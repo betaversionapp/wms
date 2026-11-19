@@ -1768,6 +1768,251 @@
             </section>
 
             <!-- ========================================== -->
+            <!-- VIEW L: MODUL QC (INPUT & CEK KUALITAS)    -->
+            <!-- ========================================== -->
+            <section id="view-qc" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 max-w-2xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+
+                    <button type="button" onclick="navigateTo('qc-report')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        <span>View Laporan</span>
+                    </button>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-5">
+                    <!-- Kartu Input QC -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <i data-lucide="shield-check" class="w-6 h-6 text-emerald-600"></i>
+                                <h2 class="text-xl font-bold text-slate-900">Input QC</h2>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700">Quality Control</span>
+                        </div>
+
+                        <form id="qc-entry-form" class="space-y-4">
+                            <!-- Scan / Cari Produk -->
+                            <div class="relative">
+                                <label for="qc-product-search" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Scan / Cari Produk <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="qc-product-search" autocomplete="off"
+                                            onfocus="showQcProductDropdown()" oninput="filterQcProductDropdown()"
+                                            onkeydown="handleQcSearchEnter(event)"
+                                            placeholder="Scan barcode atau ketik SKU / nama produk..."
+                                            class="w-full pl-10 pr-9 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                        <button type="button" id="clear-qc-search-btn" onclick="resetQcForm()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="focusQcScanner()" class="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold shadow-xs transition inline-flex items-center gap-2 shrink-0">
+                                        <i data-lucide="camera" class="w-4 h-4"></i>
+                                        <span>Scan</span>
+                                    </button>
+                                </div>
+
+                                <!-- Dropdown Hasil Pencarian Master Barang -->
+                                <div id="qc-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- Info Produk Terdeteksi Otomatis -->
+                            <div id="qc-product-info-card" class="hidden p-4 rounded-xl bg-emerald-50/60 border border-emerald-200/80 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block">SKU Code</span>
+                                    <span id="qc-info-sku" class="font-mono font-bold text-emerald-800 text-sm">-</span>
+                                </div>
+                                <div class="sm:col-span-2">
+                                    <span class="text-slate-400 block">Nama Produk</span>
+                                    <span id="qc-info-name" class="font-bold text-slate-900 text-sm">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block">Barcode</span>
+                                    <span id="qc-info-barcode" class="font-mono font-semibold text-slate-700">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block">Brand</span>
+                                    <span id="qc-info-brand" class="font-bold text-slate-800">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block">No Rack</span>
+                                    <span id="qc-info-rack" class="font-mono font-bold text-indigo-700">-</span>
+                                </div>
+                            </div>
+
+                            <!-- Expired Date -->
+                            <div>
+                                <label for="qc-expired-date" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Expired Date
+                                </label>
+                                <input type="date" id="qc-expired-date"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                            </div>
+
+                            <!-- Kondisi (Bagus / Rusak) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Kondisi <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button type="button" id="qc-cond-bagus-btn" onclick="setQcCondition('Bagus')"
+                                        class="py-3 px-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/70 text-emerald-700 font-bold text-sm flex items-center justify-center gap-2 transition">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                        <span>Bagus</span>
+                                    </button>
+                                    <button type="button" id="qc-cond-rusak-btn" onclick="setQcCondition('Rusak')"
+                                        class="py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm flex items-center justify-center gap-2 transition">
+                                        <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                        <span>Rusak</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Alasan Kerusakan (Muncul jika memilih Rusak) -->
+                            <div id="qc-damage-reason-box" class="hidden space-y-2 p-4 rounded-xl bg-rose-50/70 border border-rose-200/80">
+                                <label for="qc-damage-reason" class="block text-xs font-bold text-rose-800 uppercase">
+                                    Alasan / Detail Kerusakan <span class="text-rose-600">*</span>
+                                </label>
+                                <input type="text" id="qc-damage-reason" placeholder="Contoh: Kemasan penyok, segel terbuka, bocor..."
+                                    class="w-full px-3.5 py-2.5 bg-white border border-rose-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500">
+                            </div>
+
+                            <!-- Qty QC (Opsional / Default 1) -->
+                            <div>
+                                <label for="qc-qty-input" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Qty Dicek
+                                </label>
+                                <input type="number" id="qc-qty-input" value="1" min="1" required
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+
+                            <!-- Tombol Simpan Data QC -->
+                            <div class="pt-2">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 active:bg-emerald-800 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Data QC</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Riwayat Input QC Hari Ini -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RIWAYAT QC HARI INI</span>
+                            <span id="qc-today-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700">0 Data</span>
+                        </div>
+                        <div id="qc-today-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1">
+                            <!-- Diisi dinamis -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW L2: LAPORAN QUALITY CONTROL (QC)      -->
+            <!-- ========================================== -->
+            <section id="view-qc-report" class="hidden fade-in">
+                <div class="mb-5 max-w-6xl mx-auto">
+                    <button onclick="navigateTo('qc')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Input QC</span>
+                    </button>
+                </div>
+
+                <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                    <!-- Header Laporan QC -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Laporan Quality Control (QC)</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekap hasil pemeriksaan kondisi barang (Bagus &amp; Rusak) beserta Expired Date.</p>
+                        </div>
+                        <button type="button" onclick="exportQcReportCsv()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition self-start sm:self-auto">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                            <span>Export Excel / CSV</span>
+                        </button>
+                    </div>
+
+                    <!-- Filter Tanggal, Kondisi & Search -->
+                    <div class="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-3.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            <div>
+                                <label for="qc-report-start-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">DARI TANGGAL</label>
+                                <input type="date" id="qc-report-start-date" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label for="qc-report-end-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">SAMPAI TANGGAL</label>
+                                <input type="date" id="qc-report-end-date" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label for="qc-report-condition-filter" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">FILTER KONDISI</label>
+                                <select id="qc-report-condition-filter" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="all">Semua Kondisi</option>
+                                    <option value="Bagus">Bagus</option>
+                                    <option value="Rusak">Rusak</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="qc-report-search" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">CARI SKU / NAMA PRODUK / BARCODE</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="qc-report-search" oninput="renderQcReport()"
+                                    placeholder="Ketik SKU, nama produk, atau scan barcode..."
+                                    class="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <button type="button" onclick="resetQcReportFilter()" class="p-2.5 bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 rounded-xl transition shrink-0" title="Reset Filter">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Laporan QC -->
+                    <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="py-3 px-4">TANGGAL &amp; JAM</th>
+                                    <th class="py-3 px-4">SKU CODE</th>
+                                    <th class="py-3 px-4">PRODUCT NAME</th>
+                                    <th class="py-3 px-4">BRAND</th>
+                                    <th class="py-3 px-4">EXPIRED DATE</th>
+                                    <th class="py-3 px-4">KONDISI</th>
+                                    <th class="py-3 px-4">KETERANGAN</th>
+                                    <th class="py-3 px-4 text-right">QTY</th>
+                                    <th class="py-3 px-4">PETUGAS</th>
+                                    <th class="py-3 px-4 text-right">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="qc-report-table-body" class="divide-y divide-slate-100 text-xs">
+                                <!-- Diisi dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Summary QC -->
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-700">
+                        <span id="qc-report-summary-total">Total Pemeriksaan: 0</span>
+                        <div class="flex items-center gap-4">
+                            <span id="qc-report-summary-bagus" class="text-emerald-700">Bagus: 0</span>
+                            <span id="qc-report-summary-rusak" class="text-rose-600">Rusak: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
             <!-- VIEW G: MODUL OPERASIONAL LAINNYA          -->
             <!-- ========================================== -->
             <section id="view-module-placeholder" class="hidden fade-in">
@@ -2611,6 +2856,11 @@
         let cycleCountEntries = [];
         let selectedCycleCountProduct = null;
 
+        // Data Hasil Quality Control (QC)
+        let qcEntries = [];
+        let selectedQcProduct = null;
+        let selectedQcCondition = 'Bagus';
+
         let currentUser = null;
         let visiblePasswords = {}; // Menyimpan state visibility password per user ID di tabel
         let currentDispatchReportPeriod = 'today';
@@ -2855,6 +3105,8 @@
                 navigateTo('print-label');
             } else if (menuId === 'opname') {
                 navigateTo('cycle-count');
+            } else if (menuId === 'qc') {
+                navigateTo('qc');
             } else {
                 openPlaceholderModule(menuObj);
             }
@@ -2877,6 +3129,8 @@
                 'view-print-label',
                 'view-cycle-count',
                 'view-cycle-count-report',
+                'view-qc',
+                'view-qc-report',
                 'view-module-placeholder'
             ];
 
@@ -2918,6 +3172,10 @@
                 initCycleCountView();
             } else if (viewName === 'cycle-count-report') {
                 initCycleCountReportView();
+            } else if (viewName === 'qc') {
+                initQcView();
+            } else if (viewName === 'qc-report') {
+                initQcReportView();
             }
 
             lucide.createIcons();
@@ -5455,6 +5713,348 @@
                 return;
             }
             showToast(`${filtered.length} baris hasil Cycle Count berhasil dikirim ke Google Sheet!`, 'success');
+        }
+
+        // ==========================================
+        // 12. MODUL QUALITY CONTROL (QC) & LAPORAN QC
+        // ==========================================
+        function initQcView() {
+            setQcCondition(selectedQcCondition || 'Bagus');
+            renderQcTodayList();
+        }
+
+        function focusQcScanner() {
+            const input = document.getElementById('qc-product-search');
+            if (input) {
+                input.focus();
+                input.select();
+                showQcProductDropdown();
+                showToast('Scanner aktif: silakan scan barcode atau ketik SKU / nama produk.', 'info');
+            }
+        }
+
+        function showQcProductDropdown() {
+            filterQcProductDropdown();
+            document.getElementById('qc-product-dropdown').classList.remove('hidden');
+        }
+
+        function filterQcProductDropdown() {
+            const input = document.getElementById('qc-product-search');
+            const dropdown = document.getElementById('qc-product-dropdown');
+            const clearBtn = document.getElementById('clear-qc-search-btn');
+            const query = (input.value || '').toLowerCase().trim();
+
+            clearBtn.classList.toggle('hidden', input.value.length === 0);
+
+            const sorted = [...masterBarangData].sort((a, b) =>
+                a.sku.localeCompare(b.sku, 'id', { numeric: true, sensitivity: 'base' })
+            );
+
+            const matches = sorted.filter(item =>
+                item.sku.toLowerCase().includes(query) ||
+                item.name.toLowerCase().includes(query) ||
+                item.barcode.toLowerCase().includes(query)
+            );
+
+            dropdown.innerHTML = matches.length === 0
+                ? `<div class="p-3.5 text-xs text-slate-400 text-center">Produk tidak ditemukan di Master Barang.</div>`
+                : matches.map(item => `
+                    <button type="button" onclick="selectQcProduct('${item.sku}')"
+                        class="w-full px-4 py-2.5 text-left hover:bg-emerald-50/70 transition flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-emerald-700 font-mono">${item.sku} • <span class="text-slate-500 font-normal">${item.barcode}</span></div>
+                            <div class="text-xs font-bold text-slate-800 truncate">${item.name}</div>
+                            <div class="text-[11px] text-slate-400">Brand: ${item.brand} • Rak: ${item.noRack}</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-700 font-mono text-[11px] font-bold shrink-0">${item.noRack}</span>
+                    </button>
+                `).join('');
+
+            dropdown.classList.remove('hidden');
+        }
+
+        function handleQcSearchEnter(event) {
+            if (event.key !== 'Enter') return;
+            event.preventDefault();
+            const query = (event.target.value || '').toLowerCase().trim();
+            if (!query) return;
+
+            const exact = masterBarangData.find(
+                b => b.barcode.toLowerCase() === query || b.sku.toLowerCase() === query
+            );
+            if (exact) {
+                selectQcProduct(exact.sku);
+                return;
+            }
+
+            const partial = masterBarangData.find(
+                b => b.sku.toLowerCase().includes(query) ||
+                     b.name.toLowerCase().includes(query) ||
+                     b.barcode.toLowerCase().includes(query)
+            );
+            if (partial) {
+                selectQcProduct(partial.sku);
+            } else {
+                showToast(`Produk "${event.target.value}" tidak ditemukan di Master Barang.`, 'warning');
+            }
+        }
+
+        function selectQcProduct(sku) {
+            const product = masterBarangData.find(b => b.sku === sku);
+            if (!product) return;
+
+            selectedQcProduct = product;
+            document.getElementById('qc-product-search').value = `${product.sku} - ${product.name}`;
+            document.getElementById('clear-qc-search-btn').classList.remove('hidden');
+            document.getElementById('qc-product-dropdown').classList.add('hidden');
+
+            const infoCard = document.getElementById('qc-product-info-card');
+            infoCard.classList.remove('hidden');
+            document.getElementById('qc-info-sku').textContent = product.sku;
+            document.getElementById('qc-info-name').textContent = product.name;
+            document.getElementById('qc-info-barcode').textContent = product.barcode;
+            document.getElementById('qc-info-brand').textContent = product.brand;
+            document.getElementById('qc-info-rack').textContent = product.noRack;
+
+            document.getElementById('qc-expired-date').value = product.expiredDate || '';
+        }
+
+        function setQcCondition(condition) {
+            selectedQcCondition = condition;
+            const bagusBtn = document.getElementById('qc-cond-bagus-btn');
+            const rusakBtn = document.getElementById('qc-cond-rusak-btn');
+            const reasonBox = document.getElementById('qc-damage-reason-box');
+            const reasonInput = document.getElementById('qc-damage-reason');
+
+            if (condition === 'Bagus') {
+                bagusBtn.className = 'py-3 px-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/70 text-emerald-700 font-bold text-sm flex items-center justify-center gap-2 transition';
+                rusakBtn.className = 'py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm flex items-center justify-center gap-2 transition';
+                reasonBox.classList.add('hidden');
+                reasonInput.required = false;
+                reasonInput.value = '';
+            } else {
+                rusakBtn.className = 'py-3 px-4 rounded-xl border-2 border-rose-500 bg-rose-50/70 text-rose-700 font-bold text-sm flex items-center justify-center gap-2 transition';
+                bagusBtn.className = 'py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm flex items-center justify-center gap-2 transition';
+                reasonBox.classList.remove('hidden');
+                reasonInput.required = true;
+                reasonInput.focus();
+            }
+            lucide.createIcons();
+        }
+
+        function resetQcForm() {
+            selectedQcProduct = null;
+            document.getElementById('qc-product-search').value = '';
+            document.getElementById('clear-qc-search-btn').classList.add('hidden');
+            document.getElementById('qc-product-dropdown').classList.add('hidden');
+            document.getElementById('qc-product-info-card').classList.add('hidden');
+            document.getElementById('qc-expired-date').value = '';
+            document.getElementById('qc-qty-input').value = 1;
+            setQcCondition('Bagus');
+        }
+
+        document.addEventListener('click', function(e) {
+            const qcInput = document.getElementById('qc-product-search');
+            const qcDrop = document.getElementById('qc-product-dropdown');
+            if (qcInput && qcDrop && !qcInput.contains(e.target) && !qcDrop.contains(e.target)) {
+                qcDrop.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('qc-entry-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!selectedQcProduct) {
+                showToast('Scan atau pilih produk terlebih dahulu dari Master Barang.', 'warning');
+                return;
+            }
+
+            const expiredDate = document.getElementById('qc-expired-date').value || '';
+            const qty = Math.max(1, parseInt(document.getElementById('qc-qty-input').value, 10) || 1);
+            const damageReason = selectedQcCondition === 'Rusak'
+                ? document.getElementById('qc-damage-reason').value.trim()
+                : '';
+
+            if (selectedQcCondition === 'Rusak' && !damageReason) {
+                showToast('Masukkan alasan / detail kerusakan produk.', 'warning');
+                return;
+            }
+
+            const todayIso = getTodayISO();
+            const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+
+            qcEntries.unshift({
+                id: 'QC-' + Date.now().toString().slice(-5),
+                date: todayIso,
+                time: nowTime,
+                sku: selectedQcProduct.sku,
+                barcode: selectedQcProduct.barcode,
+                name: selectedQcProduct.name,
+                brand: selectedQcProduct.brand,
+                expiredDate,
+                condition: selectedQcCondition,
+                note: damageReason || 'Layak / Sesuai Standar',
+                qty,
+                petugas: currentUser ? currentUser.username : 'System'
+            });
+
+            const savedSku = selectedQcProduct.sku;
+            const savedCond = selectedQcCondition;
+            resetQcForm();
+            renderQcTodayList();
+            showToast(`Data QC "${savedSku}" (${savedCond}) berhasil disimpan!`, 'success');
+        });
+
+        function renderQcTodayList() {
+            const container = document.getElementById('qc-today-list');
+            const badge = document.getElementById('qc-today-count-badge');
+            if (!container || !badge) return;
+
+            const todayIso = getTodayISO();
+            const todayItems = qcEntries.filter(item => item.date === todayIso);
+            badge.textContent = `${todayItems.length} Data`;
+
+            if (todayItems.length === 0) {
+                container.innerHTML = `<div class="py-8 text-center text-xs text-slate-400">Belum ada data pemeriksaan QC hari ini.</div>`;
+                return;
+            }
+
+            container.innerHTML = todayItems.map(item => {
+                const isGood = item.condition === 'Bagus';
+                return `
+                    <div class="py-3 flex items-start justify-between gap-3">
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <span class="font-mono text-xs font-extrabold text-slate-800">${item.sku}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${isGood ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                    ${item.condition}
+                                </span>
+                                <span class="text-xs font-bold text-slate-700">(${item.qty} pcs)</span>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-700 mt-0.5">${item.name}</div>
+                            <div class="text-[11px] text-slate-400 mt-0.5">
+                                ${item.time} • Exp: ${item.expiredDate ? formatDateIndo(item.expiredDate) : '-'} • ${item.note}
+                            </div>
+                        </div>
+                        <button type="button" onclick="deleteQcEntry('${item.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg transition" title="Hapus">
+                            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                        </button>
+                    </div>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function deleteQcEntry(id) {
+            qcEntries = qcEntries.filter(item => item.id !== id);
+            renderQcTodayList();
+            renderQcReport();
+            showToast('Data QC dihapus.', 'info');
+        }
+
+        // Laporan QC
+        function initQcReportView() {
+            const startInput = document.getElementById('qc-report-start-date');
+            const endInput = document.getElementById('qc-report-end-date');
+            if (startInput && !startInput.value) startInput.value = getTodayISO();
+            if (endInput && !endInput.value) endInput.value = getTodayISO();
+            renderQcReport();
+        }
+
+        function getFilteredQcReportEntries() {
+            const startDate = document.getElementById('qc-report-start-date')?.value || '';
+            const endDate = document.getElementById('qc-report-end-date')?.value || '';
+            const condFilter = document.getElementById('qc-report-condition-filter')?.value || 'all';
+            const query = (document.getElementById('qc-report-search')?.value || '').toLowerCase().trim();
+
+            return qcEntries.filter(item => {
+                const matchStart = !startDate || item.date >= startDate;
+                const matchEnd = !endDate || item.date <= endDate;
+                const matchCond = condFilter === 'all' || item.condition === condFilter;
+                const matchQuery = !query ||
+                    item.sku.toLowerCase().includes(query) ||
+                    item.name.toLowerCase().includes(query) ||
+                    item.barcode.toLowerCase().includes(query);
+                return matchStart && matchEnd && matchCond && matchQuery;
+            });
+        }
+
+        function renderQcReport() {
+            const tbody = document.getElementById('qc-report-table-body');
+            if (!tbody) return;
+
+            const filtered = getFilteredQcReportEntries();
+            const bagusQty = filtered.filter(i => i.condition === 'Bagus').reduce((s, i) => s + Number(i.qty || 0), 0);
+            const rusakQty = filtered.filter(i => i.condition === 'Rusak').reduce((s, i) => s + Number(i.qty || 0), 0);
+
+            document.getElementById('qc-report-summary-total').textContent = `Total Pemeriksaan: ${filtered.length} entri`;
+            document.getElementById('qc-report-summary-bagus').textContent = `Bagus: ${bagusQty} pcs`;
+            document.getElementById('qc-report-summary-rusak').textContent = `Rusak: ${rusakQty} pcs`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="10" class="py-10 text-center text-xs text-slate-400">Tidak ada data laporan QC yang sesuai filter.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const isGood = item.condition === 'Bagus';
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-4 font-mono text-slate-600 whitespace-nowrap">${formatDateIndo(item.date)} ${item.time}</td>
+                        <td class="py-3 px-4 font-mono font-bold text-emerald-700">${item.sku}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-800">${item.name}</td>
+                        <td class="py-3 px-4 text-slate-700">${item.brand}</td>
+                        <td class="py-3 px-4 text-slate-600">${item.expiredDate ? formatDateIndo(item.expiredDate) : '-'}</td>
+                        <td class="py-3 px-4">
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${isGood ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+                                ${item.condition}
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-600">${item.note}</td>
+                        <td class="py-3 px-4 text-right font-extrabold text-slate-900">${item.qty}</td>
+                        <td class="py-3 px-4 font-semibold text-slate-700">${item.petugas}</td>
+                        <td class="py-3 px-4 text-right">
+                            <button type="button" onclick="deleteQcEntry('${item.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded transition" title="Hapus">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function resetQcReportFilter() {
+            document.getElementById('qc-report-start-date').value = getTodayISO();
+            document.getElementById('qc-report-end-date').value = getTodayISO();
+            document.getElementById('qc-report-condition-filter').value = 'all';
+            document.getElementById('qc-report-search').value = '';
+            renderQcReport();
+        }
+
+        function exportQcReportCsv() {
+            const filtered = getFilteredQcReportEntries();
+            if (filtered.length === 0) {
+                showToast('Tidak ada data laporan QC untuk diekspor.', 'warning');
+                return;
+            }
+            const headers = ['Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'Expired Date', 'Kondisi', 'Keterangan', 'Qty', 'Petugas'];
+            const rows = filtered.map(item => [
+                item.date,
+                item.time,
+                item.sku,
+                item.barcode,
+                item.name,
+                item.brand,
+                item.expiredDate || '-',
+                item.condition,
+                item.note,
+                item.qty,
+                item.petugas
+            ]);
+            downloadCsvFile(`Laporan_QC_${getTodayISO()}.csv`, headers, rows);
+            showToast('Laporan QC berhasil diekspor ke CSV!', 'success');
         }
 
         // ==========================================
