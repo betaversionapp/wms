@@ -288,6 +288,10 @@
                                     <i data-lucide="wifi" class="w-4 h-4"></i>
                                     <span>Tes Koneksi Script</span>
                                 </button>
+                                <button type="button" onclick="syncAllDataToGoogleSheet()" class="px-5 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 font-semibold rounded-xl text-sm transition flex items-center gap-2">
+                                    <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+                                    <span>Kirim Semua Data ke Sheet</span>
+                                </button>
                             </div>
                         </form>
                     </div>
@@ -312,56 +316,80 @@
                                 </div>
                                 <div class="flex justify-between py-1.5">
                                     <span>Mode Sinkronisasi:</span>
-                                    <span class="font-semibold text-indigo-600">REST JSON (POST/GET)</span>
+                                    <span class="font-semibold text-indigo-600">Auto-Sync Real-time (POST)</span>
                                 </div>
                             </div>
                         </div>
 
                         <div class="bg-slate-900 text-slate-200 rounded-2xl p-6 shadow-sm">
                             <div class="flex items-center justify-between mb-3">
-                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Contoh Kode Apps Script</span>
-                                <button type="button" onclick="copySampleScript()" class="text-xs bg-slate-800 hover:bg-slate-700 text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1">
-                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin
+                                <span class="text-xs font-bold uppercase tracking-wider text-indigo-400">Kode Apps Script (Wajib Dipasang di Sheet)</span>
+                                <button type="button" onclick="copySampleScript()" class="text-xs bg-indigo-600 hover:bg-indigo-500 text-white px-2.5 py-1 rounded-lg transition flex items-center gap-1 font-semibold">
+                                    <i data-lucide="copy" class="w-3.5 h-3.5"></i> Salin Kode
                                 </button>
                             </div>
-                            <pre id="sample-apps-script" class="text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-3 rounded-xl border border-slate-800">function doGet(e) {
-  try {
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-    var sheet = ss.getSheetByName("Users") || ss.getSheets()[0];
-    var data = sheet ? sheet.getDataRange().getValues() : [];
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: "connected",
-        sheetName: sheet ? sheet.getName() : "Default",
-        rows: data.length
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: "error",
-        message: err.message
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
-  }
+                            <p class="text-[11px] text-slate-400 mb-2">Salin kode di bawah ini ke <strong>Extensions &rarr; Apps Script</strong> di Google Sheet Anda, lalu klik <strong>Deploy &rarr; New deployment</strong> (Akses: <em>Anyone</em>).</p>
+                            <pre id="sample-apps-script" class="text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-3 rounded-xl border border-slate-800 max-h-64">function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  return ContentService.createTextOutput(JSON.stringify({
+    status: "connected",
+    spreadsheet: ss.getName(),
+    sheets: ss.getSheets().map(function(s) { return s.getName(); })
+  })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
   try {
-    var payload = JSON.parse(e.postData.contents || "{}");
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: "ok",
-        received: payload.action || "sync"
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    var ss = SpreadsheetApp.getActiveSpreadsheet();
+    var raw = (e && e.postData && e.postData.contents) ? e.postData.contents : "{}";
+    var payload = JSON.parse(raw);
+    var sheetName = payload.sheetName || "Log_Aktivitas";
+    var action = payload.action || "insert";
+    var headers = payload.headers || [];
+    var rows = payload.rows || [];
+
+    var sheet = ss.getSheetByName(sheetName);
+    if (!sheet) {
+      sheet = ss.insertSheet(sheetName);
+      if (headers.length > 0) {
+        sheet.appendRow(headers);
+        sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+      }
+    } else if (sheet.getLastRow() === 0 && headers.length > 0) {
+      sheet.appendRow(headers);
+      sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+    }
+
+    if (action === "replace_all") {
+      sheet.clearContents();
+      if (headers.length > 0) {
+        sheet.appendRow(headers);
+        sheet.getRange(1, 1, 1, headers.length).setFontWeight("bold");
+      }
+      rows.forEach(function(r) { sheet.appendRow(r); });
+    } else if (action === "delete" && payload.id) {
+      var data = sheet.getDataRange().getValues();
+      for (var i = data.length - 1; i >= 1; i--) {
+        if (String(data[i][0]) === String(payload.id)) {
+          sheet.deleteRow(i + 1);
+        }
+      }
+    } else {
+      rows.forEach(function(r) {
+        sheet.appendRow(r);
+      });
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "ok",
+      sheetName: sheetName,
+      inserted: rows.length
+    })).setMimeType(ContentService.MimeType.JSON);
   } catch (err) {
-    return ContentService
-      .createTextOutput(JSON.stringify({
-        status: "error",
-        message: err.message
-      }))
-      .setMimeType(ContentService.MimeType.JSON);
+    return ContentService.createTextOutput(JSON.stringify({
+      status: "error",
+      message: err.toString()
+    })).setMimeType(ContentService.MimeType.JSON);
   }
 }</pre>
                         </div>
@@ -520,7 +548,7 @@ function doPost(e) {
                     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
                         <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
                             <span id="dispatch-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">ENTRI • -</span>
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
+                            <span id="dispatch-sync-badge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium bg-slate-100 text-slate-500">
                                 <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
                                 <span>Lokal</span>
                             </span>
@@ -1915,7 +1943,7 @@ function doPost(e) {
                                 </div>
                             </div>
 
-                            <!-- Expired Date & Qty Dicek (Dipindah ke atas Kondisi) -->
+                            <!-- Expired Date & Qty Dicek -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label for="qc-expired-date" class="block text-xs font-bold text-slate-700 mb-1.5">
@@ -1961,7 +1989,7 @@ function doPost(e) {
                                     class="w-full px-3.5 py-2.5 bg-white border border-rose-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500">
                             </div>
 
-                            <!-- Notes (Di bawah Kondisi) -->
+                            <!-- Notes -->
                             <div>
                                 <div class="flex items-center justify-between mb-1.5">
                                     <label for="qc-notes-input" class="text-xs font-bold text-slate-700">
@@ -2232,7 +2260,7 @@ function doPost(e) {
                                         <i data-lucide="fingerprint" class="w-4 h-4 text-teal-600"></i>
                                         <span>Ringkasan Absensi Staff</span>
                                     </h3>
-                                    <button type="button" onclick="navigateTo('absen-report')" class="text-[11px] font-bold text-teal-700 hover:underline">Detail →</button>
+                                    <button type="button" onclick="navigateTo('absen-report')" class="text-[11px] font-bold text-teal-700 hover:underline">Detail &rarr;</button>
                                 </div>
                                 <div id="lap-absen-summary-list" class="divide-y divide-slate-100 max-h-[210px] overflow-y-auto pr-1">
                                     <!-- Render dinamis -->
@@ -2246,7 +2274,7 @@ function doPost(e) {
                                         <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
                                         <span>Ringkasan Overtime Staff</span>
                                     </h3>
-                                    <button type="button" onclick="navigateTo('overtime-report')" class="text-[11px] font-bold text-amber-700 hover:underline">Detail →</button>
+                                    <button type="button" onclick="navigateTo('overtime-report')" class="text-[11px] font-bold text-amber-700 hover:underline">Detail &rarr;</button>
                                 </div>
                                 <div id="lap-overtime-summary-list" class="divide-y divide-slate-100 max-h-[210px] overflow-y-auto pr-1">
                                     <!-- Render dinamis -->
@@ -3381,7 +3409,6 @@ function doPost(e) {
         ].sort((a, b) => a.title.localeCompare(b.title, 'id', { sensitivity: 'base' }));
 
         // 2. ATURAN PEMETAAN POSISI -> MENU YANG TERBUKA OTOMATIS
-        // Manager dan SPV otomatis membuka ALL MENU
         const ALL_MENU_IDS = MASTER_MENUS.map(m => m.id);
         let ROLE_PERMISSIONS = {
             'Manager': [...ALL_MENU_IDS],
@@ -3394,7 +3421,9 @@ function doPost(e) {
             'Qc': ['absen', 'overtime', 'print_label', 'qc']
         };
 
-        // 3. STATE DATA IN-MEMORY (SESUAI DAFTAR USER BARU)
+        // 3. STATE DATA IN-MEMORY + PERSISTENSI LOCALSTORAGE
+        const STORAGE_KEY_STATE = 'wms_pro_state_v1';
+
         let usersData = [
             { id: 'USR-001', username: 'Taufik', password: '12345', role: 'Manager' },
             { id: 'USR-002', username: 'Anggye', password: '12345', role: 'SPV' },
@@ -3424,7 +3453,6 @@ function doPost(e) {
             { id: 'USR-026', username: 'Eko', password: '12345', role: 'Operator' }
         ];
 
-        // Master Data Expedisi (otomatis muncul di dropdown menu Dispatch)
         let expedisiData = [
             { id: 'EXP-01', name: 'Anteraja', service: '' },
             { id: 'EXP-02', name: 'Goto', service: '' },
@@ -3437,7 +3465,6 @@ function doPost(e) {
             { id: 'EXP-09', name: 'Spx', service: '' }
         ];
 
-        // Data Riwayat Entri Resi Dispatch
         const getTodayISO = () => {
             const d = new Date();
             const year = d.getFullYear();
@@ -3475,7 +3502,6 @@ function doPost(e) {
             lastUpdated: '-'
         };
 
-        // Master Data Reason Absensi (bisa tambah & hapus)
         let absenReasons = [
             'Cuti',
             'Telat',
@@ -3486,7 +3512,6 @@ function doPost(e) {
             'Cuti khusus'
         ];
 
-        // Riwayat Entri Absensi
         let absenEntries = [
             {
                 id: 'ABS-001',
@@ -3500,14 +3525,12 @@ function doPost(e) {
             }
         ];
 
-        // Master Data Reason Overtime (bisa tambah & hapus)
         let overtimeReasons = [
             'Lembur Operasional',
             'Lembur Stock Opname',
             'Lembur Bongkar Container'
         ];
 
-        // Riwayat Entri Overtime
         let overtimeEntries = [
             {
                 id: 'OVT-001',
@@ -3522,7 +3545,6 @@ function doPost(e) {
             }
         ];
 
-        // Master Data Barang (Database SKU)
         let masterBarangData = [
             {
                 sku: 'SKU-001',
@@ -3558,7 +3580,6 @@ function doPost(e) {
             }
         ];
 
-        // Master Data Project
         let projectsData = [
             {
                 id: 'PRJ-001',
@@ -3586,16 +3607,13 @@ function doPost(e) {
             }
         ];
 
-        // Data Hasil Cycle Count
         let cycleCountEntries = [];
         let selectedCycleCountProduct = null;
 
-        // Data Hasil Quality Control (QC)
         let qcEntries = [];
         let selectedQcProduct = null;
         let selectedQcCondition = 'Bagus';
 
-        // Data Modul Admin: Input Resi & Input Salah Barang
         let adminResiEntries = [
             {
                 id: 'AR-001',
@@ -3624,6 +3642,180 @@ function doPost(e) {
         let selectedSalahBarangProduct = null;
 
         let currentUser = null;
+
+        // ==========================================
+        // PENYIMPANAN LOKAL (LOCALSTORAGE) & GOOGLE SHEET SYNC ENGINE
+        // ==========================================
+        function saveAppStateToLocal() {
+            try {
+                const payload = {
+                    setupConfig,
+                    usersData,
+                    expedisiData,
+                    dispatchEntries,
+                    absenReasons,
+                    absenEntries,
+                    overtimeReasons,
+                    overtimeEntries,
+                    masterBarangData,
+                    projectsData,
+                    cycleCountEntries,
+                    qcEntries,
+                    adminResiEntries,
+                    salahBarangEntries
+                };
+                localStorage.setItem(STORAGE_KEY_STATE, JSON.stringify(payload));
+            } catch (e) {
+                // Abaikan jika storage penuh
+            }
+        }
+
+        function loadAppStateFromLocal() {
+            try {
+                const raw = localStorage.getItem(STORAGE_KEY_STATE);
+                if (!raw) return;
+                const saved = JSON.parse(raw);
+                if (saved.setupConfig) setupConfig = { ...setupConfig, ...saved.setupConfig };
+                if (Array.isArray(saved.usersData) && saved.usersData.length > 0) usersData = saved.usersData;
+                if (Array.isArray(saved.expedisiData) && saved.expedisiData.length > 0) expedisiData = saved.expedisiData;
+                if (Array.isArray(saved.dispatchEntries)) dispatchEntries = saved.dispatchEntries;
+                if (Array.isArray(saved.absenReasons) && saved.absenReasons.length > 0) absenReasons = saved.absenReasons;
+                if (Array.isArray(saved.absenEntries)) absenEntries = saved.absenEntries;
+                if (Array.isArray(saved.overtimeReasons) && saved.overtimeReasons.length > 0) overtimeReasons = saved.overtimeReasons;
+                if (Array.isArray(saved.overtimeEntries)) overtimeEntries = saved.overtimeEntries;
+                if (Array.isArray(saved.masterBarangData) && saved.masterBarangData.length > 0) masterBarangData = saved.masterBarangData;
+                if (Array.isArray(saved.projectsData)) projectsData = saved.projectsData;
+                if (Array.isArray(saved.cycleCountEntries)) cycleCountEntries = saved.cycleCountEntries;
+                if (Array.isArray(saved.qcEntries)) qcEntries = saved.qcEntries;
+                if (Array.isArray(saved.adminResiEntries)) adminResiEntries = saved.adminResiEntries;
+                if (Array.isArray(saved.salahBarangEntries)) salahBarangEntries = saved.salahBarangEntries;
+
+                const urlInput = document.getElementById('setup-script-url');
+                const nameInput = document.getElementById('setup-sheet-name');
+                const idInput = document.getElementById('setup-sheet-id');
+                if (urlInput && setupConfig.appsScriptUrl) urlInput.value = setupConfig.appsScriptUrl;
+                if (nameInput && setupConfig.sheetName) nameInput.value = setupConfig.sheetName;
+                if (idInput && setupConfig.spreadsheetId) idInput.value = setupConfig.spreadsheetId;
+                updateSetupConnectionUI();
+            } catch (e) {
+                // Abaikan jika JSON rusak
+            }
+        }
+
+        async function postToGoogleSheet(sheetName, headers, rows, action = 'insert', extraPayload = {}) {
+            saveAppStateToLocal();
+            const url = (setupConfig.appsScriptUrl || '').trim();
+            if (!url) return false;
+
+            const bodyPayload = JSON.stringify({
+                action,
+                sheetName,
+                headers,
+                rows,
+                ...extraPayload
+            });
+
+            try {
+                // Gunakan mode no-cors dengan text/plain agar Google Apps Script selalu menerima POST tanpa terblokir preflight CORS
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: bodyPayload
+                });
+                setupConfig.isConnected = true;
+                setupConfig.lastUpdated = new Date().toLocaleString('id-ID');
+                saveAppStateToLocal();
+                updateSetupConnectionUI();
+                return true;
+            } catch (err) {
+                console.warn('Gagal mengirim data ke Google Sheet:', err);
+                return false;
+            }
+        }
+
+        async function syncAllDataToGoogleSheet() {
+            const url = (setupConfig.appsScriptUrl || '').trim();
+            if (!url) {
+                showToast('Masukkan dan simpan URL Google Apps Script terlebih dahulu.', 'warning');
+                return;
+            }
+            showToast('Mengirim seluruh data ke tab-tab Google Sheet...', 'info');
+
+            await postToGoogleSheet(
+                'Dispatch',
+                ['ID', 'Tanggal', 'Jam', 'Packer', 'Expedisi', 'Jumlah Resi', 'Input Oleh'],
+                dispatchEntries.map(i => [i.id, i.date, i.timestamp, i.packer, i.expedisi, i.qty, i.createdBy]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'Absen',
+                ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Catatan', 'Input Oleh'],
+                absenEntries.map(i => [i.id, i.date, i.timestamp, i.staffName, i.staffRole, i.reason, i.note || '-', i.createdBy]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'Overtime',
+                ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Jumlah Jam', 'Catatan', 'Input Oleh'],
+                overtimeEntries.map(i => [i.id, i.date, i.timestamp, i.staffName, i.staffRole, i.reason, i.hours, i.note || '-', i.createdBy]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'MasterBarang',
+                ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'],
+                masterBarangData.map(b => [b.sku, b.name, b.barcode, b.brand, b.noRack, b.expiredDate || '-']),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'CycleCount',
+                ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Qty Fisik', 'Petugas'],
+                cycleCountEntries.map(i => [i.id, i.date, i.time, i.sku, i.barcode, i.name, i.brand, i.noRack, i.expiryDate || '-', i.qty, i.officer]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'QC',
+                ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'Expired Date', 'Kondisi', 'Keterangan', 'Qty', 'Petugas'],
+                qcEntries.map(i => [i.id, i.date, i.time, i.sku, i.barcode, i.name, i.brand, i.expiredDate || '-', i.condition, i.note, i.qty, i.officer]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'AdminResi',
+                ['ID', 'Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'],
+                adminResiEntries.map(i => [i.id, i.date, i.timestamp, i.picker, i.expedisi, i.qty, i.createdBy]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'SalahBarang',
+                ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'],
+                salahBarangEntries.map(i => [i.id, i.date, i.timestamp, i.sku, i.barcode || '-', i.name, i.picker, i.qty, i.createdBy]),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'Project',
+                ['ID', 'Nama Project', 'PIC', 'DueDate', 'Status', 'Notes'],
+                projectsData.map(p => [p.id, p.name, p.pic, p.dueDate, p.status, p.notes || '-']),
+                'replace_all'
+            );
+
+            await postToGoogleSheet(
+                'Users',
+                ['ID User', 'Username', 'Password', 'Posisi'],
+                usersData.map(u => [u.id, u.username, u.password, u.role]),
+                'replace_all'
+            );
+
+            showToast('Seluruh data berhasil disinkronkan ke Google Sheet!', 'success');
+        }
 
         // ==========================================
         // INISIALISASI & TOAST NOTIFICATION
@@ -3922,8 +4114,9 @@ function doPost(e) {
                     setupConfig.isConnected = true;
                     setupConfig.lastUpdated = new Date().toLocaleString('id-ID');
 
+                    saveAppStateToLocal();
                     updateSetupConnectionUI();
-                    showToast('Konfigurasi Google Apps Script berhasil disimpan!', 'success');
+                    showToast('Konfigurasi Google Apps Script berhasil disimpan! Setiap input otomatis masuk ke Sheet.', 'success');
                 } catch (err) {
                     showToast('Terjadi kesalahan saat menyimpan konfigurasi: ' + err.message, 'error');
                 }
@@ -3973,14 +4166,15 @@ function doPost(e) {
                     }
 
                     setupConfig.isConnected = true;
+                    saveAppStateToLocal();
                     updateSetupConnectionUI();
-                    showToast('Koneksi ke Google Apps Script berhasil terhubung!', 'success');
+                    showToast(`Koneksi berhasil ke Spreadsheet "${data.spreadsheet || setupConfig.sheetName}"!`, 'success');
                 } catch (fetchErr) {
                     clearTimeout(timeoutId);
-                    // Fallback jika akses "Anyone" belum mengizinkan CORS langsung tapi URL valid
                     setupConfig.isConnected = true;
+                    saveAppStateToLocal();
                     updateSetupConnectionUI();
-                    showToast('URL tersimpan & aktif. Jika data belum masuk, pastikan deployment Apps Script diset ke "Anyone".', 'warning');
+                    showToast('URL tersimpan & aktif. Pastikan kode Apps Script terbaru sudah di-Deploy (Anyone).', 'warning');
                 }
             } catch (err) {
                 setupConfig.isConnected = false;
@@ -3994,6 +4188,7 @@ function doPost(e) {
             const lastUpdatedEl = document.getElementById('setup-last-updated');
             const headerDot = document.getElementById('sheet-dot');
             const headerText = document.getElementById('sheet-status-text');
+            const dispatchBadge = document.getElementById('dispatch-sync-badge');
 
             if (lastUpdatedEl) {
                 lastUpdatedEl.textContent = setupConfig.lastUpdated || '-';
@@ -4008,10 +4203,14 @@ function doPost(e) {
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                         <span>Terhubung ke Google Sheet</span>
                     </div>
-                    <p class="text-xs mt-1 text-emerald-700">Database <strong>${setupConfig.sheetName}</strong> siap menerima sinkronisasi data.</p>
+                    <p class="text-xs mt-1 text-emerald-700">Database <strong>${setupConfig.sheetName}</strong> menerima data otomatis saat Simpan diklik.</p>
                 `;
                 if (headerDot) headerDot.className = 'w-2 h-2 rounded-full bg-emerald-500';
                 if (headerText) headerText.textContent = 'Sheet Terhubung';
+                if (dispatchBadge) {
+                    dispatchBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700';
+                    dispatchBadge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span><span>Auto-Sync Sheet</span>`;
+                }
             } else {
                 card.className = 'p-4 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-sm';
                 card.innerHTML = `
@@ -4040,7 +4239,7 @@ function doPost(e) {
             textarea.select();
             document.execCommand('copy');
             document.body.removeChild(textarea);
-            showToast('Contoh kode Apps Script disalin ke clipboard!', 'success');
+            showToast('Kode Apps Script berhasil disalin! Paste ke Code.gs di Google Sheet Anda.', 'success');
         }
 
         // ==========================================
@@ -4236,9 +4435,21 @@ function doPost(e) {
                 if (idx !== -1) {
                     usersData[idx] = { id, username, password, role };
                 }
+                postToGoogleSheet(
+                    'Users',
+                    ['ID User', 'Username', 'Password', 'Posisi'],
+                    usersData.map(u => [u.id, u.username, u.password, u.role]),
+                    'replace_all'
+                );
                 showToast(`Data user "${username}" berhasil diperbarui!`, 'success');
             } else {
                 usersData.push({ id, username, password, role });
+                postToGoogleSheet(
+                    'Users',
+                    ['ID User', 'Username', 'Password', 'Posisi'],
+                    [[id, username, password, role]],
+                    'insert'
+                );
                 showToast(`User baru "${username}" berhasil ditambahkan!`, 'success');
             }
 
@@ -4252,6 +4463,7 @@ function doPost(e) {
                 return;
             }
             usersData = usersData.filter(u => u.id !== userId);
+            postToGoogleSheet('Users', ['ID User', 'Username', 'Password', 'Posisi'], [], 'delete', { id: userId });
             renderUserTable();
             showToast('User berhasil dihapus.', 'info');
         }
@@ -4417,25 +4629,35 @@ function doPost(e) {
             }
 
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'DSP-' + Date.now().toString().slice(-5);
+            const createdBy = currentUser ? currentUser.username : 'Staff';
             dispatchEntries.unshift({
-                id: 'DSP-' + Date.now().toString().slice(-5),
+                id: newId,
                 date,
                 packer,
                 expedisi,
                 qty,
                 timestamp: nowTime,
-                createdBy: currentUser ? currentUser.username : 'Staff'
+                createdBy
             });
+
+            postToGoogleSheet(
+                'Dispatch',
+                ['ID', 'Tanggal', 'Jam', 'Packer', 'Expedisi', 'Jumlah Resi', 'Input Oleh'],
+                [[newId, date, nowTime, packer, expedisi, qty, createdBy]],
+                'insert'
+            );
 
             document.getElementById('dispatch-packer').value = '';
             document.getElementById('dispatch-expedisi').value = '';
             document.getElementById('dispatch-qty').value = '';
             renderDispatchStatsAndList();
-            showToast('Entri resi Dispatch berhasil disimpan!', 'success');
+            showToast(setupConfig.appsScriptUrl ? 'Entri resi Dispatch tersimpan & dikirim ke Google Sheet!' : 'Entri resi Dispatch berhasil disimpan!', 'success');
         });
 
         function deleteDispatchEntry(id) {
             dispatchEntries = dispatchEntries.filter(item => item.id !== id);
+            postToGoogleSheet('Dispatch', ['ID', 'Tanggal', 'Jam', 'Packer', 'Expedisi', 'Jumlah Resi', 'Input Oleh'], [], 'delete', { id });
             renderDispatchStatsAndList();
             showToast('Entri resi dihapus.', 'info');
         }
@@ -4590,7 +4812,9 @@ function doPost(e) {
                 return;
             }
 
-            expedisiData.push({ id: 'EXP-' + Date.now().toString().slice(-4), name, service: '' });
+            const newId = 'EXP-' + Date.now().toString().slice(-4);
+            expedisiData.push({ id: newId, name, service: '' });
+            postToGoogleSheet('Expedisi', ['ID', 'Nama Expedisi'], [[newId, name]], 'insert');
             nameInput.value = '';
             renderExpedisiList();
             showToast(`Expedisi "${name}" berhasil ditambahkan!`, 'success');
@@ -4598,6 +4822,7 @@ function doPost(e) {
 
         function deleteExpedisi(id) {
             expedisiData = expedisiData.filter(e => e.id !== id);
+            postToGoogleSheet('Expedisi', ['ID', 'Nama Expedisi'], [], 'delete', { id });
             renderExpedisiList();
             showToast('Expedisi dihapus.', 'info');
         }
@@ -4675,23 +4900,34 @@ function doPost(e) {
 
             const userObj = usersData.find(u => u.username.toLowerCase() === staffName.toLowerCase());
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'ABS-' + Date.now().toString().slice(-5);
+            const finalStaffName = userObj ? userObj.username : staffName;
+            const finalStaffRole = userObj ? userObj.role : 'Staff';
+            const createdBy = currentUser ? currentUser.username : 'Admin';
 
             absenEntries.unshift({
-                id: 'ABS-' + Date.now().toString().slice(-5),
+                id: newId,
                 date,
-                staffName: userObj ? userObj.username : staffName,
-                staffRole: userObj ? userObj.role : 'Staff',
+                staffName: finalStaffName,
+                staffRole: finalStaffRole,
                 reason,
                 note,
                 timestamp: nowTime,
-                createdBy: currentUser ? currentUser.username : 'Admin'
+                createdBy
             });
+
+            postToGoogleSheet(
+                'Absen',
+                ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Catatan', 'Input Oleh'],
+                [[newId, date, nowTime, finalStaffName, finalStaffRole, reason, note || '-', createdBy]],
+                'insert'
+            );
 
             clearAbsenStaffSelection();
             document.getElementById('absen-reason').value = '';
             document.getElementById('absen-note').value = '';
             renderAbsenList();
-            showToast(`Absensi "${staffName}" (${reason}) berhasil disimpan!`, 'success');
+            showToast(setupConfig.appsScriptUrl ? `Absensi "${finalStaffName}" tersimpan & dikirim ke Google Sheet!` : `Absensi "${finalStaffName}" (${reason}) berhasil disimpan!`, 'success');
         });
 
         function renderAbsenList() {
@@ -4728,6 +4964,7 @@ function doPost(e) {
 
         function deleteAbsenEntry(id) {
             absenEntries = absenEntries.filter(item => item.id !== id);
+            postToGoogleSheet('Absen', ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Catatan', 'Input Oleh'], [], 'delete', { id });
             renderAbsenList();
             showToast('Catatan absensi dihapus.', 'info');
         }
@@ -4914,25 +5151,36 @@ function doPost(e) {
 
             const userObj = usersData.find(u => u.username.toLowerCase() === staffName.toLowerCase());
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'OVT-' + Date.now().toString().slice(-5);
+            const finalStaffName = userObj ? userObj.username : staffName;
+            const finalStaffRole = userObj ? userObj.role : 'Staff';
+            const createdBy = currentUser ? currentUser.username : 'Admin';
 
             overtimeEntries.unshift({
-                id: 'OVT-' + Date.now().toString().slice(-5),
+                id: newId,
                 date,
-                staffName: userObj ? userObj.username : staffName,
-                staffRole: userObj ? userObj.role : 'Staff',
+                staffName: finalStaffName,
+                staffRole: finalStaffRole,
                 reason,
                 hours,
                 note,
                 timestamp: nowTime,
-                createdBy: currentUser ? currentUser.username : 'Admin'
+                createdBy
             });
+
+            postToGoogleSheet(
+                'Overtime',
+                ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Jumlah Jam', 'Catatan', 'Input Oleh'],
+                [[newId, date, nowTime, finalStaffName, finalStaffRole, reason, hours, note || '-', createdBy]],
+                'insert'
+            );
 
             clearOvertimeStaffSelection();
             document.getElementById('overtime-reason').value = '';
             document.getElementById('overtime-hours').value = '';
             document.getElementById('overtime-note').value = '';
             renderOvertimeList();
-            showToast(`Overtime "${staffName}" (${hours} jam) berhasil disimpan!`, 'success');
+            showToast(setupConfig.appsScriptUrl ? `Overtime "${finalStaffName}" tersimpan & dikirim ke Google Sheet!` : `Overtime "${finalStaffName}" (${hours} jam) berhasil disimpan!`, 'success');
         });
 
         function renderOvertimeList() {
@@ -4972,6 +5220,7 @@ function doPost(e) {
 
         function deleteOvertimeEntry(id) {
             overtimeEntries = overtimeEntries.filter(item => item.id !== id);
+            postToGoogleSheet('Overtime', ['ID', 'Tanggal', 'Jam', 'Nama Staff', 'Posisi', 'Reason', 'Jumlah Jam', 'Catatan', 'Input Oleh'], [], 'delete', { id });
             renderOvertimeList();
             showToast('Data overtime dihapus.', 'info');
         }
@@ -5194,6 +5443,12 @@ function doPost(e) {
                 if (idx !== -1) {
                     masterBarangData[idx] = { sku, barcode, name, brand, noRack, expiredDate };
                 }
+                postToGoogleSheet(
+                    'MasterBarang',
+                    ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'],
+                    masterBarangData.map(b => [b.sku, b.name, b.barcode, b.brand, b.noRack, b.expiredDate || '-']),
+                    'replace_all'
+                );
                 showToast(`Barang "${sku}" berhasil diperbarui!`, 'success');
             } else {
                 if (masterBarangData.some(b => b.sku.toLowerCase() === sku.toLowerCase())) {
@@ -5201,6 +5456,12 @@ function doPost(e) {
                     return;
                 }
                 masterBarangData.push({ sku, barcode, name, brand, noRack, expiredDate });
+                postToGoogleSheet(
+                    'MasterBarang',
+                    ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'],
+                    [[sku, name, barcode, brand, noRack, expiredDate || '-']],
+                    'insert'
+                );
                 showToast(`Barang "${sku}" berhasil ditambahkan!`, 'success');
             }
             closeBarangModal();
@@ -5209,6 +5470,7 @@ function doPost(e) {
 
         function deleteMasterBarang(sku) {
             masterBarangData = masterBarangData.filter(b => b.sku !== sku);
+            postToGoogleSheet('MasterBarang', ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'], [], 'delete', { id: sku });
             renderMasterBarangTable();
             showToast(`Barang "${sku}" dihapus.`, 'info');
         }
@@ -5266,6 +5528,12 @@ function doPost(e) {
                 event.target.value = '';
                 closeImportBarangModal();
                 renderMasterBarangTable();
+                postToGoogleSheet(
+                    'MasterBarang',
+                    ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'],
+                    masterBarangData.map(b => [b.sku, b.name, b.barcode, b.brand, b.noRack, b.expiredDate || '-']),
+                    'replace_all'
+                );
                 showToast(`Berhasil mengimpor ${importedCount} data barang!`, 'success');
             };
             reader.readAsText(file);
@@ -5393,9 +5661,22 @@ function doPost(e) {
             if (editId) {
                 const idx = projectsData.findIndex(p => p.id === editId);
                 if (idx !== -1) projectsData[idx] = { id: editId, name, pic, dueDate, status, notes };
+                postToGoogleSheet(
+                    'Project',
+                    ['ID', 'Nama Project', 'PIC', 'DueDate', 'Status', 'Notes'],
+                    projectsData.map(p => [p.id, p.name, p.pic, p.dueDate, p.status, p.notes || '-']),
+                    'replace_all'
+                );
                 showToast('Project berhasil diperbarui!', 'success');
             } else {
-                projectsData.unshift({ id: 'PRJ-' + Date.now().toString().slice(-4), name, pic, dueDate, status, notes });
+                const newId = 'PRJ-' + Date.now().toString().slice(-4);
+                projectsData.unshift({ id: newId, name, pic, dueDate, status, notes });
+                postToGoogleSheet(
+                    'Project',
+                    ['ID', 'Nama Project', 'PIC', 'DueDate', 'Status', 'Notes'],
+                    [[newId, name, pic, dueDate, status, notes || '-']],
+                    'insert'
+                );
                 showToast('Project baru berhasil ditambahkan!', 'success');
             }
             closeProjectModal();
@@ -5404,6 +5685,7 @@ function doPost(e) {
 
         function deleteProject(id) {
             projectsData = projectsData.filter(p => p.id !== id);
+            postToGoogleSheet('Project', ['ID', 'Nama Project', 'PIC', 'DueDate', 'Status', 'Notes'], [], 'delete', { id });
             renderProjectList();
             showToast('Project dihapus.', 'info');
         }
@@ -5736,9 +6018,11 @@ function doPost(e) {
             const expiryDate = document.getElementById('cc-expiry-date').value;
             const today = getTodayISO();
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'CC-' + Date.now().toString().slice(-5);
+            const officer = currentUser ? currentUser.username : 'Staff';
 
             cycleCountEntries.unshift({
-                id: 'CC-' + Date.now().toString().slice(-5),
+                id: newId,
                 date: today,
                 time: nowTime,
                 sku: selectedCycleCountProduct.sku,
@@ -5748,12 +6032,19 @@ function doPost(e) {
                 noRack,
                 expiryDate,
                 qty,
-                officer: currentUser ? currentUser.username : 'Staff'
+                officer
             });
+
+            postToGoogleSheet(
+                'CycleCount',
+                ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Qty Fisik', 'Petugas'],
+                [[newId, today, nowTime, selectedCycleCountProduct.sku, selectedCycleCountProduct.barcode, selectedCycleCountProduct.name, selectedCycleCountProduct.brand, noRack, expiryDate || '-', qty, officer]],
+                'insert'
+            );
 
             resetCycleCountForm();
             renderCycleCountSessionTable();
-            showToast('Entri Cycle Count berhasil disimpan!', 'success');
+            showToast(setupConfig.appsScriptUrl ? 'Entri Cycle Count tersimpan & dikirim ke Google Sheet!' : 'Entri Cycle Count berhasil disimpan!', 'success');
         });
 
         function renderCycleCountSessionTable() {
@@ -5833,6 +6124,7 @@ function doPost(e) {
 
         function deleteCycleCountEntry(id) {
             cycleCountEntries = cycleCountEntries.filter(i => i.id !== id);
+            postToGoogleSheet('CycleCount', ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Qty Fisik', 'Petugas'], [], 'delete', { id });
             renderCycleCountReport();
             renderCycleCountSessionTable();
             showToast('Data Cycle Count dihapus.', 'info');
@@ -5861,11 +6153,17 @@ function doPost(e) {
             showToast('Laporan Cycle Count berhasil diekspor!', 'success');
         }
 
-        function syncCycleCountToGoogleSheet() {
-            if (!setupConfig.isConnected) {
+        async function syncCycleCountToGoogleSheet() {
+            if (!setupConfig.appsScriptUrl) {
                 showToast('Hubungkan URL Google Apps Script di menu Setting terlebih dahulu.', 'warning');
                 return;
             }
+            await postToGoogleSheet(
+                'CycleCount',
+                ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Qty Fisik', 'Petugas'],
+                cycleCountEntries.map(i => [i.id, i.date, i.time, i.sku, i.barcode, i.name, i.brand, i.noRack, i.expiryDate || '-', i.qty, i.officer]),
+                'replace_all'
+            );
             showToast('Data Cycle Count berhasil disinkronkan ke Google Sheet!', 'success');
         }
 
@@ -6040,7 +6338,9 @@ function doPost(e) {
             }
             const expiredDate = document.getElementById('qc-expired-date').value;
             const damageReason = document.getElementById('qc-damage-reason').value.trim();
+            const notesInput = document.getElementById('qc-notes-input').value.trim();
             const qty = parseInt(document.getElementById('qc-qty-input').value, 10) || 1;
+            const qcOfficer = document.getElementById('qc-staff-selected').value || document.getElementById('qc-staff-search').value.trim() || (currentUser ? currentUser.username : 'QC');
 
             if (selectedQcCondition === 'Rusak' && !damageReason) {
                 showToast('Masukkan alasan kerusakan barang.', 'warning');
@@ -6048,9 +6348,15 @@ function doPost(e) {
             }
 
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'QC-' + Date.now().toString().slice(-5);
+            const today = getTodayISO();
+            const finalNote = selectedQcCondition === 'Rusak'
+                ? (notesInput ? `${damageReason} (${notesInput})` : damageReason)
+                : (notesInput || 'Kondisi Baik');
+
             qcEntries.unshift({
-                id: 'QC-' + Date.now().toString().slice(-5),
-                date: getTodayISO(),
+                id: newId,
+                date: today,
                 time: nowTime,
                 sku: selectedQcProduct.sku,
                 barcode: selectedQcProduct.barcode,
@@ -6058,14 +6364,21 @@ function doPost(e) {
                 brand: selectedQcProduct.brand,
                 expiredDate,
                 condition: selectedQcCondition,
-                note: selectedQcCondition === 'Rusak' ? damageReason : 'Kondisi Baik',
+                note: finalNote,
                 qty,
-                officer: currentUser ? currentUser.username : 'QC'
+                officer: qcOfficer
             });
+
+            postToGoogleSheet(
+                'QC',
+                ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'Expired Date', 'Kondisi', 'Keterangan', 'Qty', 'Petugas'],
+                [[newId, today, nowTime, selectedQcProduct.sku, selectedQcProduct.barcode, selectedQcProduct.name, selectedQcProduct.brand, expiredDate || '-', selectedQcCondition, finalNote, qty, qcOfficer]],
+                'insert'
+            );
 
             resetQcForm();
             renderQcTodayList();
-            showToast('Data QC berhasil disimpan!', 'success');
+            showToast(setupConfig.appsScriptUrl ? 'Data QC tersimpan & dikirim ke Google Sheet!' : 'Data QC berhasil disimpan!', 'success');
         });
 
         function renderQcTodayList() {
@@ -6159,6 +6472,7 @@ function doPost(e) {
 
         function deleteQcEntry(id) {
             qcEntries = qcEntries.filter(i => i.id !== id);
+            postToGoogleSheet('QC', ['ID', 'Tanggal', 'Jam', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'Expired Date', 'Kondisi', 'Keterangan', 'Qty', 'Petugas'], [], 'delete', { id });
             renderQcReport();
             renderQcTodayList();
             showToast('Data QC dihapus.', 'info');
@@ -6360,26 +6674,36 @@ function doPost(e) {
             }
 
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'AR-' + Date.now().toString().slice(-5);
+            const createdBy = currentUser ? currentUser.username : 'Admin';
             adminResiEntries.unshift({
-                id: 'AR-' + Date.now().toString().slice(-5),
+                id: newId,
                 date,
                 picker,
                 expedisi,
                 qty,
                 timestamp: nowTime,
-                createdBy: currentUser ? currentUser.username : 'Admin'
+                createdBy
             });
+
+            postToGoogleSheet(
+                'AdminResi',
+                ['ID', 'Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'],
+                [[newId, date, nowTime, picker, expedisi, qty, createdBy]],
+                'insert'
+            );
 
             document.getElementById('admin-resi-picker').value = '';
             document.getElementById('admin-resi-expedisi').value = '';
             document.getElementById('admin-resi-qty').value = '';
 
             renderAdminResiStatsAndList();
-            showToast(`Input resi Picker "${picker}" (${expedisi}: ${qty}) berhasil disimpan!`, 'success');
+            showToast(setupConfig.appsScriptUrl ? `Input resi Picker "${picker}" tersimpan & dikirim ke Google Sheet!` : `Input resi Picker "${picker}" (${expedisi}: ${qty}) berhasil disimpan!`, 'success');
         });
 
         function deleteAdminResiEntry(id) {
             adminResiEntries = adminResiEntries.filter(item => item.id !== id);
+            postToGoogleSheet('AdminResi', ['ID', 'Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'], [], 'delete', { id });
             renderAdminResiStatsAndList();
             renderAdminResiReport();
             showToast('Data Input Resi dihapus.', 'info');
@@ -6594,8 +6918,10 @@ function doPost(e) {
             }
 
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'SB-' + Date.now().toString().slice(-5);
+            const createdBy = currentUser ? currentUser.username : 'Admin';
             salahBarangEntries.unshift({
-                id: 'SB-' + Date.now().toString().slice(-5),
+                id: newId,
                 date,
                 sku: selectedSalahBarangProduct.sku,
                 barcode: selectedSalahBarangProduct.barcode,
@@ -6603,8 +6929,15 @@ function doPost(e) {
                 picker,
                 qty,
                 timestamp: nowTime,
-                createdBy: currentUser ? currentUser.username : 'Admin'
+                createdBy
             });
+
+            postToGoogleSheet(
+                'SalahBarang',
+                ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'],
+                [[newId, date, nowTime, selectedSalahBarangProduct.sku, selectedSalahBarangProduct.barcode || '-', selectedSalahBarangProduct.name, picker, qty, createdBy]],
+                'insert'
+            );
 
             const savedSku = selectedSalahBarangProduct.sku;
             resetSalahBarangProductSelection();
@@ -6612,7 +6945,7 @@ function doPost(e) {
             document.getElementById('sb-qty').value = '';
 
             renderSalahBarangDailyList();
-            showToast(`Data Salah Barang "${savedSku}" (Picker: ${picker}, Qty: ${qty}) tersimpan!`, 'success');
+            showToast(setupConfig.appsScriptUrl ? `Data Salah Barang "${savedSku}" tersimpan & dikirim ke Google Sheet!` : `Data Salah Barang "${savedSku}" (Picker: ${picker}, Qty: ${qty}) tersimpan!`, 'success');
         });
 
         function renderSalahBarangDailyList() {
@@ -6652,6 +6985,7 @@ function doPost(e) {
 
         function deleteSalahBarangEntry(id) {
             salahBarangEntries = salahBarangEntries.filter(item => item.id !== id);
+            postToGoogleSheet('SalahBarang', ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'], [], 'delete', { id });
             renderSalahBarangDailyList();
             renderSalahBarangReport();
             showToast('Data Salah Barang dihapus.', 'info');
@@ -6735,9 +7069,9 @@ function doPost(e) {
         }
 
         // ==========================================
-        // KAMERA PEMINDAI BARCODE (MASTER BARANG & CYCLE COUNT)
+        // KAMERA PEMINDAI BARCODE
         // ==========================================
-        let activeBarcodeScannerTarget = null; // 'master_barang' | 'cycle_count' | 'cycle_count_report' | 'admin_salah_barang' | 'qc'
+        let activeBarcodeScannerTarget = null;
         let barcodeMediaStream = null;
         let barcodeScanAnimFrame = null;
         let html5QrScannerInstance = null;
@@ -6794,7 +7128,6 @@ function doPost(e) {
             }
 
             try {
-                // Muat daftar kamera jika tersedia
                 const devices = await navigator.mediaDevices.enumerateDevices();
                 const videoDevices = devices.filter(d => d.kind === 'videoinput');
                 if (videoDevices.length > 1) {
@@ -6806,7 +7139,6 @@ function doPost(e) {
                     cameraSelect.classList.add('hidden');
                 }
 
-                // Gunakan BarcodeDetector bawaan browser jika didukung (cepat & presisi)
                 if ('BarcodeDetector' in window) {
                     const constraints = {
                         video: preferredDeviceId
@@ -6840,7 +7172,6 @@ function doPost(e) {
                     };
                     barcodeScanAnimFrame = requestAnimationFrame(detectLoop);
                 } else if (typeof Html5Qrcode !== 'undefined') {
-                    // Fallback menggunakan html5-qrcode untuk browser tanpa BarcodeDetector
                     videoEl.classList.add('hidden');
                     overlayEl.classList.add('hidden');
                     qrReaderEl.classList.remove('hidden');
@@ -7007,6 +7338,7 @@ function doPost(e) {
         // INISIALISASI AWAL HALAMAN
         // ==========================================
         document.addEventListener('DOMContentLoaded', function() {
+            loadAppStateFromLocal();
             lucide.createIcons();
         });
     </script>
