@@ -596,9 +596,9 @@
             <!-- ========================================== -->
             <section id="view-expedisi" class="hidden fade-in">
                 <div class="mb-6 max-w-md mx-auto">
-                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                    <button onclick="navigateTo('dispatch')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                        <span>Kembali ke Menu Utama</span>
+                        <span>Kembali ke Dispatch</span>
                     </button>
                 </div>
 
@@ -2013,6 +2013,172 @@
             </section>
 
             <!-- ========================================== -->
+            <!-- VIEW M: MODUL LAPORAN TERPADU              -->
+            <!-- ========================================== -->
+            <section id="view-laporan" class="hidden fade-in">
+                <div class="mb-5 max-w-6xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+
+                <div class="max-w-6xl mx-auto space-y-5">
+                    <!-- Header Banner Merah Muda / Rose -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="bar-chart-3" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-xl font-bold text-slate-900">Laporan Operasional Terpadu</h2>
+                                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekapitulasi menyeluruh performa Dispatch, Absensi &amp; Lembur (Overtime) Staff.</p>
+                            </div>
+                        </div>
+
+                        <!-- Filter Periode & Tombol Ekspor -->
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-xs">
+                                <input type="date" id="laporan-start-date" onchange="renderLaporanTerpadu()"
+                                    class="bg-transparent font-semibold text-slate-800 focus:outline-none">
+                                <span class="text-slate-400 font-bold">s/d</span>
+                                <input type="date" id="laporan-end-date" onchange="renderLaporanTerpadu()"
+                                    class="bg-transparent font-semibold text-slate-800 focus:outline-none">
+                            </div>
+                            <button type="button" onclick="exportLaporanTerpaduExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                <i data-lucide="download" class="w-4 h-4"></i>
+                                <span>Ekspor Rekap Excel</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 4 Kartu Metrik Utama -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <!-- Card 1: Total Resi -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="package" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL RESI</div>
+                                <div id="lap-card-total-resi" class="text-2xl font-extrabold text-slate-900 mt-0.5">0</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 2: Rata-rata / Hari -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="trending-up" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">RATA-RATA / HARI</div>
+                                <div id="lap-card-avg-resi" class="text-2xl font-extrabold text-slate-900 mt-0.5">0,0</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 3: Total Absen -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-teal-50 text-teal-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="user-check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL ABSEN</div>
+                                <div id="lap-card-total-absen" class="text-2xl font-extrabold text-slate-900 mt-0.5">0 Hari</div>
+                            </div>
+                        </div>
+
+                        <!-- Card 4: Total Overtime -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 flex items-center gap-4">
+                            <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="clock" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">TOTAL OVERTIME</div>
+                                <div id="lap-card-total-overtime" class="text-2xl font-extrabold text-slate-900 mt-0.5">0 Jam</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Grafik & Tabel Ringkasan -->
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                        <!-- Panel Kiri (7 kolom): Rekap Resi Harian & Top Packer -->
+                        <div class="lg:col-span-7 space-y-5">
+                            <!-- Grafik Resi Per Hari -->
+                            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                                <div class="flex items-center justify-between mb-4">
+                                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-indigo-600"></i>
+                                        <span>Trend Resi Dispatch Harian</span>
+                                    </h3>
+                                    <span id="lap-trend-badge" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">0 Resi</span>
+                                </div>
+                                <div id="lap-daily-dispatch-bars" class="space-y-3">
+                                    <!-- Render dinamis -->
+                                </div>
+                            </div>
+
+                            <!-- Rekap Kinerja Packer & Ekspedisi -->
+                            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                                <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+                                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="award" class="w-4 h-4 text-amber-500"></i>
+                                        <span>Peringkat Produktivitas Packer</span>
+                                    </h3>
+                                    <span class="text-[11px] font-semibold text-slate-400">Berdasarkan Jumlah Resi</span>
+                                </div>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase">
+                                                <th class="py-2.5 px-5">Packer</th>
+                                                <th class="py-2.5 px-5 text-center">Frekuensi Entri</th>
+                                                <th class="py-2.5 px-5 text-right">Total Resi</th>
+                                                <th class="py-2.5 px-5 text-right">Kontribusi</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="lap-packer-table-body" class="divide-y divide-slate-100 text-xs">
+                                            <!-- Render dinamis -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Panel Kanan (5 kolom): Rincian Absensi & Overtime -->
+                        <div class="lg:col-span-5 space-y-5">
+                            <!-- Rekap Absensi Staff -->
+                            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                                <div class="flex items-center justify-between mb-3.5">
+                                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="fingerprint" class="w-4 h-4 text-teal-600"></i>
+                                        <span>Ringkasan Absensi Staff</span>
+                                    </h3>
+                                    <button type="button" onclick="navigateTo('absen-report')" class="text-[11px] font-bold text-teal-700 hover:underline">Detail →</button>
+                                </div>
+                                <div id="lap-absen-summary-list" class="divide-y divide-slate-100 max-h-[210px] overflow-y-auto pr-1">
+                                    <!-- Render dinamis -->
+                                </div>
+                            </div>
+
+                            <!-- Rekap Overtime Staff -->
+                            <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                                <div class="flex items-center justify-between mb-3.5">
+                                    <h3 class="text-sm font-bold text-slate-900 flex items-center gap-2">
+                                        <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
+                                        <span>Ringkasan Overtime Staff</span>
+                                    </h3>
+                                    <button type="button" onclick="navigateTo('overtime-report')" class="text-[11px] font-bold text-amber-700 hover:underline">Detail →</button>
+                                </div>
+                                <div id="lap-overtime-summary-list" class="divide-y divide-slate-100 max-h-[210px] overflow-y-auto pr-1">
+                                    <!-- Render dinamis -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
             <!-- VIEW G: MODUL OPERASIONAL LAINNYA          -->
             <!-- ========================================== -->
             <section id="view-module-placeholder" class="hidden fade-in">
@@ -2035,6 +2201,323 @@
                     <div class="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-200/70 text-xs text-slate-600 flex items-center justify-center gap-2">
                         <i data-lucide="database" class="w-4 h-4 text-indigo-500"></i>
                         <span>Data transaksi pada modul ini akan disinkronkan ke Google Sheet yang diatur pada menu <strong>Setting</strong>.</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW M: MODUL ADMIN (PILIHAN SUB-MENU)     -->
+            <!-- ========================================== -->
+            <section id="view-admin" class="hidden fade-in">
+                <div class="mb-6 max-w-3xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+
+                <div class="max-w-3xl mx-auto">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-bold text-slate-900">Administrasi Gudang</h2>
+                        <p class="text-sm text-slate-500 mt-1">Pilih layanan administrasi gudang yang ingin Anda kelola.</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <!-- Pilihan 1: Surat Jalan -->
+                        <button type="button" onclick="navigateTo('surat-jalan')"
+                            class="group bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-indigo-400 shadow-sm hover:shadow-md transition text-left flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition">
+                                <i data-lucide="file-text" class="w-7 h-7"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">Surat Jalan</h3>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-indigo-600"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    Buat, cetak, dan kelola dokumen pengiriman barang keluar beserta riwayat surat jalan.
+                                </p>
+                            </div>
+                        </button>
+
+                        <!-- Pilihan 2: Purchase Order -->
+                        <button type="button" onclick="navigateTo('purchase-order')"
+                            class="group bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-emerald-400 shadow-sm hover:shadow-md transition text-left flex items-start gap-4">
+                            <div class="w-14 h-14 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shrink-0 shadow-sm group-hover:scale-105 transition">
+                                <i data-lucide="shopping-cart" class="w-7 h-7"></i>
+                            </div>
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <h3 class="text-base font-bold text-slate-900 group-hover:text-emerald-600 transition">Purchase Order</h3>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 text-slate-400 group-hover:text-emerald-600"></i>
+                                </div>
+                                <p class="text-xs text-slate-500 mt-1 leading-relaxed">
+                                    Input pesanan pembelian (PO) dari supplier, status penerimaan barang, dan ekspor laporan.
+                                </p>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW M1: SURAT JALAN (FORM & RIWAYAT)      -->
+            <!-- ========================================== -->
+            <section id="view-surat-jalan" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 max-w-5xl mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Admin</span>
+                    </button>
+
+                    <button type="button" onclick="exportSuratJalanExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
+
+                <div class="max-w-5xl mx-auto space-y-6">
+                    <!-- Kartu Form Buat Surat Jalan -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                    <i data-lucide="file-text" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg sm:text-xl font-bold text-slate-900">Buat Surat Jalan</h2>
+                                    <p class="text-xs text-slate-500">Isi detail penerima, expedisi, dan daftar barang yang dikirim.</p>
+                                </div>
+                            </div>
+                            <span id="sj-auto-number-badge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-indigo-50 text-indigo-700">SJ-001</span>
+                        </div>
+
+                        <form id="surat-jalan-form" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="sj-number" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">No. Surat Jalan</label>
+                                    <input type="text" id="sj-number" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="sj-date" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tanggal Kirim</label>
+                                    <input type="date" id="sj-date" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="sj-expedisi" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Expedisi / Armada</label>
+                                    <select id="sj-expedisi" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                        <option value="">— Pilih Expedisi —</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="sj-recipient" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tujuan / Penerima <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="sj-recipient" required placeholder="Contoh: Toko Cabang Bandung / PT Maju Jaya"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                                <div>
+                                    <label for="sj-driver" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Nama Driver / No. Resi</label>
+                                    <input type="text" id="sj-driver" placeholder="Contoh: Budi (B 1234 XYZ)"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                </div>
+                            </div>
+
+                            <!-- Tambah Item Barang ke Surat Jalan -->
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                <div class="text-xs font-bold text-slate-700 uppercase">Daftar Barang Dikirim</div>
+                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                                    <div class="sm:col-span-7">
+                                        <select id="sj-item-sku"
+                                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                            <option value="">— Pilih Produk dari Master Barang —</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <input type="number" id="sj-item-qty" min="1" placeholder="Qty"
+                                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <button type="button" onclick="addSuratJalanDraftItem()" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
+                                            + Tambah
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="sj-draft-items-list" class="divide-y divide-slate-200/70 text-xs">
+                                    <!-- Item sementara di-render via JS -->
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition inline-flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Surat Jalan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Daftar Riwayat Surat Jalan -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <h3 class="text-base font-bold text-slate-900">Riwayat Surat Jalan</h3>
+                            <input type="text" id="sj-search-input" oninput="renderSuratJalanList()" placeholder="Cari No. SJ, tujuan, expedisi..."
+                                class="w-full sm:w-64 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                        <th class="py-3 px-5">No. Surat Jalan</th>
+                                        <th class="py-3 px-5">Tanggal</th>
+                                        <th class="py-3 px-5">Tujuan / Penerima</th>
+                                        <th class="py-3 px-5">Expedisi</th>
+                                        <th class="py-3 px-5">Ringkasan Barang</th>
+                                        <th class="py-3 px-5 text-right">Total Qty</th>
+                                        <th class="py-3 px-5 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="sj-table-body" class="divide-y divide-slate-100 text-xs">
+                                    <!-- Diisi dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW M2: PURCHASE ORDER (PO)               -->
+            <!-- ========================================== -->
+            <section id="view-purchase-order" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6 max-w-5xl mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Admin</span>
+                    </button>
+
+                    <button type="button" onclick="exportPurchaseOrderExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition">
+                        <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                        <span>Export Excel</span>
+                    </button>
+                </div>
+
+                <div class="max-w-5xl mx-auto space-y-6">
+                    <!-- Kartu Form Input Purchase Order -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+                        <div class="flex items-center justify-between pb-4 mb-5 border-b border-slate-100">
+                            <div class="flex items-center gap-3">
+                                <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                    <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-lg sm:text-xl font-bold text-slate-900">Input Purchase Order (PO)</h2>
+                                    <p class="text-xs text-slate-500">Catat pesanan pembelian barang masuk dari supplier.</p>
+                                </div>
+                            </div>
+                            <span id="po-auto-number-badge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-emerald-50 text-emerald-700">PO-001</span>
+                        </div>
+
+                        <form id="purchase-order-form" class="space-y-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <div>
+                                    <label for="po-number" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">No. Purchase Order</label>
+                                    <input type="text" id="po-number" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label for="po-date" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tanggal PO</label>
+                                    <input type="date" id="po-date" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label for="po-eta-date" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Estimasi Tiba (ETA)</label>
+                                    <input type="date" id="po-eta-date" required
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="po-supplier" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Nama Supplier <span class="text-rose-500">*</span></label>
+                                    <input type="text" id="po-supplier" required placeholder="Contoh: PT Distribusi Nusantara"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+                                <div>
+                                    <label for="po-status" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Status PO</label>
+                                    <select id="po-status"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                        <option value="Open">Open</option>
+                                        <option value="Partial Received">Partial Received</option>
+                                        <option value="Received">Received</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Tambah Item Barang ke PO -->
+                            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                                <div class="text-xs font-bold text-slate-700 uppercase">Daftar Barang Dipesan</div>
+                                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                                    <div class="sm:col-span-7">
+                                        <select id="po-item-sku"
+                                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                            <option value="">— Pilih Produk dari Master Barang —</option>
+                                        </select>
+                                    </div>
+                                    <div class="sm:col-span-3">
+                                        <input type="number" id="po-item-qty" min="1" placeholder="Qty Order"
+                                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    </div>
+                                    <div class="sm:col-span-2">
+                                        <button type="button" onclick="addPurchaseOrderDraftItem()" class="w-full py-2.5 px-3 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition">
+                                            + Tambah
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div id="po-draft-items-list" class="divide-y divide-slate-200/70 text-xs">
+                                    <!-- Item sementara di-render via JS -->
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end pt-2">
+                                <button type="submit" class="px-6 py-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md shadow-emerald-600/20 transition inline-flex items-center gap-2">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Purchase Order</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Daftar Purchase Order -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                        <div class="p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <h3 class="text-base font-bold text-slate-900">Daftar Purchase Order</h3>
+                            <input type="text" id="po-search-input" oninput="renderPurchaseOrderList()" placeholder="Cari No. PO, supplier, status..."
+                                class="w-full sm:w-64 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                        <th class="py-3 px-5">No. PO</th>
+                                        <th class="py-3 px-5">Tanggal / ETA</th>
+                                        <th class="py-3 px-5">Supplier</th>
+                                        <th class="py-3 px-5">Ringkasan Barang</th>
+                                        <th class="py-3 px-5 text-right">Total Qty</th>
+                                        <th class="py-3 px-5">Status</th>
+                                        <th class="py-3 px-5 text-right">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="po-table-body" class="divide-y divide-slate-100 text-xs">
+                                    <!-- Diisi dinamis -->
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -2543,16 +3026,6 @@
                 desc: 'Pengaturan jadwal pemberangkatan dan alokasi armada pengiriman.'
             },
             {
-                id: 'expedisi',
-                title: 'Expedisi',
-                subtitle: 'Kurir & Logistik',
-                icon: 'truck',
-                colorBg: 'bg-blue-100',
-                colorText: 'text-blue-600',
-                hoverBorder: 'hover:border-blue-400',
-                desc: 'Manajemen mitra ekspedisi, nomor resi, dan pelacakan pengiriman.'
-            },
-            {
                 id: 'kpi',
                 title: 'KPI',
                 subtitle: 'Performa Kerja',
@@ -2652,10 +3125,10 @@
         let ROLE_PERMISSIONS = {
             'Manager': [...ALL_MENU_IDS],
             'SPV': [...ALL_MENU_IDS],
-            'Admin': ['absen', 'admin', 'dispatch', 'expedisi', 'laporan', 'master_barang', 'overtime', 'print_label'],
-            'Operator': ['absen', 'dispatch', 'expedisi', 'overtime', 'print_label', 'qc'],
+            'Admin': ['absen', 'admin', 'dispatch', 'laporan', 'master_barang', 'overtime', 'print_label'],
+            'Operator': ['absen', 'dispatch', 'overtime', 'print_label', 'qc'],
             'Packer': ['absen', 'dispatch', 'overtime', 'print_label'],
-            'Dispatch': ['absen', 'dispatch', 'expedisi', 'overtime', 'print_label'],
+            'Dispatch': ['absen', 'dispatch', 'overtime', 'print_label'],
             'Inventory': ['absen', 'laporan', 'master_barang', 'overtime', 'qc', 'opname'],
             'Qc': ['absen', 'overtime', 'print_label', 'qc']
         };
@@ -2860,6 +3333,38 @@
         let qcEntries = [];
         let selectedQcProduct = null;
         let selectedQcCondition = 'Bagus';
+
+        // Data Surat Jalan & Purchase Order (Modul Admin)
+        let suratJalanData = [
+            {
+                id: 'SJ-001',
+                date: getTodayISO(),
+                recipient: 'Toko Cabang Bandung',
+                expedisi: 'Jne',
+                driver: 'Budi (B 9120 KJA)',
+                items: [
+                    { sku: 'SKU-001', name: 'Susu UHT Full Cream 1L', qty: 24 },
+                    { sku: 'SKU-002', name: 'Minyak Goreng Kemasan 2L', qty: 12 }
+                ],
+                createdBy: 'Fia'
+            }
+        ];
+        let suratJalanDraftItems = [];
+
+        let purchaseOrderData = [
+            {
+                id: 'PO-001',
+                date: getTodayISO(),
+                etaDate: getTodayISO(),
+                supplier: 'PT Ultra Jaya Milk Industry',
+                status: 'Open',
+                items: [
+                    { sku: 'SKU-001', name: 'Susu UHT Full Cream 1L', qty: 120 }
+                ],
+                createdBy: 'Fia'
+            }
+        ];
+        let purchaseOrderDraftItems = [];
 
         let currentUser = null;
         let visiblePasswords = {}; // Menyimpan state visibility password per user ID di tabel
@@ -3091,8 +3596,6 @@
                 navigateTo('user');
             } else if (menuId === 'dispatch') {
                 navigateTo('dispatch');
-            } else if (menuId === 'expedisi') {
-                navigateTo('expedisi');
             } else if (menuId === 'absen') {
                 navigateTo('absen');
             } else if (menuId === 'overtime') {
@@ -3107,6 +3610,8 @@
                 navigateTo('cycle-count');
             } else if (menuId === 'qc') {
                 navigateTo('qc');
+            } else if (menuId === 'laporan') {
+                navigateTo('laporan');
             } else {
                 openPlaceholderModule(menuObj);
             }
@@ -3131,6 +3636,7 @@
                 'view-cycle-count-report',
                 'view-qc',
                 'view-qc-report',
+                'view-laporan',
                 'view-module-placeholder'
             ];
 
@@ -3176,6 +3682,8 @@
                 initQcView();
             } else if (viewName === 'qc-report') {
                 initQcReportView();
+            } else if (viewName === 'laporan') {
+                initLaporanTerpaduView();
             }
 
             lucide.createIcons();
@@ -6055,6 +6563,150 @@
             ]);
             downloadCsvFile(`Laporan_QC_${getTodayISO()}.csv`, headers, rows);
             showToast('Laporan QC berhasil diekspor ke CSV!', 'success');
+        }
+
+        // ==========================================
+        // 13. MODUL LAPORAN OPERASIONAL TERPADU
+        // ==========================================
+        function initLaporanTerpaduView() {
+            const startInput = document.getElementById('laporan-start-date');
+            const endInput = document.getElementById('laporan-end-date');
+            if (startInput && !startInput.value) startInput.value = getTodayISO();
+            if (endInput && !endInput.value) endInput.value = getTodayISO();
+            renderLaporanTerpadu();
+        }
+
+        function getFilteredLaporanTerpaduData() {
+            const startDate = document.getElementById('laporan-start-date')?.value || getTodayISO();
+            const endDate = document.getElementById('laporan-end-date')?.value || getTodayISO();
+
+            const filteredDispatch = dispatchEntries.filter(d => d.date >= startDate && d.date <= endDate);
+            const filteredAbsen = absenEntries.filter(a => a.date >= startDate && a.date <= endDate);
+            const filteredOvertime = overtimeEntries.filter(o => o.date >= startDate && o.date <= endDate);
+
+            return { startDate, endDate, filteredDispatch, filteredAbsen, filteredOvertime };
+        }
+
+        function renderLaporanTerpadu() {
+            const { startDate, endDate, filteredDispatch, filteredAbsen, filteredOvertime } = getFilteredLaporanTerpaduData();
+
+            // 1. Hitung 4 Metrik Utama
+            const totalResi = filteredDispatch.reduce((sum, item) => sum + Number(item.qty || 0), 0);
+
+            // Hitung jumlah hari unik atau selisih hari pada rentang tanggal
+            const d1 = new Date(startDate);
+            const d2 = new Date(endDate);
+            const diffDays = (!isNaN(d1) && !isNaN(d2) && d2 >= d1)
+                ? Math.max(1, Math.round((d2 - d1) / (1000 * 60 * 60 * 24)) + 1)
+                : 1;
+            const avgResiPerDay = (totalResi / diffDays).toFixed(1).replace('.', ',');
+
+            const totalAbsenHari = filteredAbsen.length;
+            const totalOvertimeJam = filteredOvertime.reduce((sum, item) => sum + Number(item.hours || 0), 0);
+
+            document.getElementById('lap-card-total-resi').textContent = totalResi.toLocaleString('id-ID');
+            document.getElementById('lap-card-avg-resi').textContent = avgResiPerDay;
+            document.getElementById('lap-card-total-absen').textContent = `${totalAbsenHari} Hari`;
+            document.getElementById('lap-card-total-overtime').textContent = `${totalOvertimeJam} Jam`;
+            document.getElementById('lap-trend-badge').textContent = `${totalResi.toLocaleString('id-ID')} Resi`;
+
+            // 2. Render Grafik Trend Resi Harian
+            const dailyMap = {};
+            filteredDispatch.forEach(d => {
+                dailyMap[d.date] = (dailyMap[d.date] || 0) + Number(d.qty || 0);
+            });
+            const dailySorted = Object.entries(dailyMap).sort((a, b) => a[0].localeCompare(b[0]));
+            const maxDaily = dailySorted.length > 0 ? Math.max(...dailySorted.map(x => x[1])) : 1;
+
+            const dailyBarsEl = document.getElementById('lap-daily-dispatch-bars');
+            dailyBarsEl.innerHTML = dailySorted.length === 0
+                ? `<div class="py-6 text-center text-xs text-slate-400">Tidak ada transaksi dispatch pada rentang tanggal ini.</div>`
+                : dailySorted.map(([dt, qty]) => {
+                    const pct = Math.round((qty / maxDaily) * 100);
+                    return `
+                        <div>
+                            <div class="flex items-center justify-between text-xs font-bold mb-1">
+                                <span class="text-slate-700">${formatDateIndo(dt)}</span>
+                                <span class="text-indigo-600">${qty.toLocaleString('id-ID')} resi</span>
+                            </div>
+                            <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+                                <div class="h-full bg-indigo-600 rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+
+            // 3. Render Tabel Peringkat Packer
+            const packerStats = {};
+            filteredDispatch.forEach(d => {
+                if (!packerStats[d.packer]) packerStats[d.packer] = { count: 0, resi: 0 };
+                packerStats[d.packer].count += 1;
+                packerStats[d.packer].resi += Number(d.qty || 0);
+            });
+            const packerRanked = Object.entries(packerStats).sort((a, b) => b[1].resi - a[1].resi);
+
+            const packerTbody = document.getElementById('lap-packer-table-body');
+            packerTbody.innerHTML = packerRanked.length === 0
+                ? `<tr><td colspan="4" class="py-8 text-center text-xs text-slate-400">Belum ada data packer pada periode terpilih.</td></tr>`
+                : packerRanked.map(([name, stat]) => {
+                    const share = totalResi > 0 ? Math.round((stat.resi / totalResi) * 100) : 0;
+                    return `
+                        <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-2.5 px-5 font-bold text-slate-800">${name}</td>
+                            <td class="py-2.5 px-5 text-center text-slate-600">${stat.count}x</td>
+                            <td class="py-2.5 px-5 text-right font-extrabold text-indigo-700">${stat.resi.toLocaleString('id-ID')}</td>
+                            <td class="py-2.5 px-5 text-right">
+                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700">${share}%</span>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+            // 4. Render Ringkasan Absensi Staff
+            const absenListEl = document.getElementById('lap-absen-summary-list');
+            absenListEl.innerHTML = filteredAbsen.length === 0
+                ? `<div class="py-6 text-center text-xs text-slate-400">Tidak ada catatan absensi pada periode ini.</div>`
+                : filteredAbsen.map(a => `
+                    <div class="py-2.5 flex items-center justify-between gap-2">
+                        <div>
+                            <div class="text-xs font-bold text-slate-800">${a.staffName} <span class="text-[11px] font-normal text-slate-400">(${a.staffRole})</span></div>
+                            <div class="text-[11px] text-slate-400">${formatDateIndo(a.date)} ${a.note ? '• ' + a.note : ''}</div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-teal-50 text-teal-700 shrink-0">${a.reason}</span>
+                    </div>
+                `).join('');
+
+            // 5. Render Ringkasan Overtime Staff
+            const overtimeListEl = document.getElementById('lap-overtime-summary-list');
+            overtimeListEl.innerHTML = filteredOvertime.length === 0
+                ? `<div class="py-6 text-center text-xs text-slate-400">Tidak ada catatan overtime pada periode ini.</div>`
+                : filteredOvertime.map(o => `
+                    <div class="py-2.5 flex items-center justify-between gap-2">
+                        <div>
+                            <div class="text-xs font-bold text-slate-800">${o.staffName} <span class="text-[11px] font-normal text-slate-400">• ${o.reason}</span></div>
+                            <div class="text-[11px] text-slate-400">${formatDateIndo(o.date)} ${o.note ? '• ' + o.note : ''}</div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-amber-50 text-amber-700 shrink-0">${o.hours} Jam</span>
+                    </div>
+                `).join('');
+        }
+
+        function exportLaporanTerpaduExcel() {
+            const { startDate, endDate, filteredDispatch, filteredAbsen, filteredOvertime } = getFilteredLaporanTerpaduData();
+            if (filteredDispatch.length === 0 && filteredAbsen.length === 0 && filteredOvertime.length === 0) {
+                showToast('Tidak ada data operasional untuk diekspor pada rentang tanggal ini.', 'warning');
+                return;
+            }
+
+            const headers = ['Kategori', 'Tanggal', 'Nama Staff / Packer', 'Detail / Expedisi / Reason', 'Nilai (Resi / Jam / Hari)', 'Keterangan'];
+            const rows = [
+                ...filteredDispatch.map(d => ['Dispatch', d.date, d.packer, d.expedisi, `${d.qty} Resi`, `Input jam ${d.timestamp}`]),
+                ...filteredAbsen.map(a => ['Absen', a.date, a.staffName, a.reason, '1 Hari', a.note || '-']),
+                ...filteredOvertime.map(o => ['Overtime', o.date, o.staffName, o.reason, `${o.hours} Jam`, o.note || '-'])
+            ];
+
+            downloadCsvFile(`Laporan_Operasional_Terpadu_${startDate}_sd_${endDate}.csv`, headers, rows);
+            showToast('Rekap Laporan Operasional berhasil diekspor ke Excel (.CSV)!', 'success');
         }
 
         // ==========================================
