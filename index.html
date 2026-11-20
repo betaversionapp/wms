@@ -2228,27 +2228,498 @@ function doPost(e) {
             <!-- VIEW N: MODUL ADMIN & PLACEHOLDER          -->
             <!-- ========================================== -->
             <section id="view-admin" class="hidden fade-in">
-                <div class="mb-6 max-w-2xl mx-auto">
+                <div class="mb-6 max-w-3xl mx-auto flex items-center justify-between">
                     <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
                         <span>Kembali ke Menu Utama</span>
                     </button>
+                    <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">Modul Administrasi</span>
                 </div>
-                <div class="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button type="button" onclick="navigateTo('admin-input-resi')" class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 shadow-sm text-left transition">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
-                            <i data-lucide="file-Spreadsheet" class="w-6 h-6"></i>
+
+                <div class="max-w-3xl mx-auto space-y-5">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/20">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
                         </div>
-                        <div class="font-bold text-slate-900">Input Resi Picker</div>
-                        <div class="text-xs text-slate-500 mt-1">Catat jumlah resi per picker dan ekspedisi.</div>
-                    </button>
-                    <button type="button" onclick="navigateTo('admin-salah-barang')" class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-rose-400 shadow-sm text-left transition">
-                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
-                            <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Administrasi Operasional Gudang</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Pilih sub-modul pencatatan resi picker atau pelaporan temuan salah barang.</p>
                         </div>
-                        <div class="font-bold text-slate-900">Catat Salah Barang</div>
-                        <div class="text-xs text-slate-500 mt-1">Pencatatan temuan kesalahan picking barang.</div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button type="button" onclick="navigateTo('admin-input-resi')" class="bg-white p-6 rounded-3xl border-2 border-slate-200/80 hover:border-indigo-500 shadow-sm hover:shadow-md text-left transition group relative overflow-hidden">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition">
+                                    <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                                </div>
+                                <span id="admin-menu-resi-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700">0 Hari Ini</span>
+                            </div>
+                            <div class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">Input Resi Picker</div>
+                            <div class="text-xs text-slate-500 mt-1 leading-relaxed">Catat jumlah resi berdasarkan nama picker dan ekspedisi pengiriman.</div>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+                                <span>Buka Form Entri</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="navigateTo('admin-salah-barang')" class="bg-white p-6 rounded-3xl border-2 border-slate-200/80 hover:border-rose-500 shadow-sm hover:shadow-md text-left transition group relative overflow-hidden">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 group-hover:bg-rose-600 group-hover:text-white flex items-center justify-center transition">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                                </div>
+                                <span id="admin-menu-sb-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700">0 Hari Ini</span>
+                            </div>
+                            <div class="text-base font-bold text-slate-900 group-hover:text-rose-600 transition">Catat Salah Barang</div>
+                            <div class="text-xs text-slate-500 mt-1 leading-relaxed">Pencatatan dan audit temuan kesalahan pengambilan barang (picking) oleh picker.</div>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
+                                <span>Buka Form Temuan</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N1: ADMIN - INPUT RESI PICKER         -->
+            <!-- ========================================== -->
+            <section id="view-admin-input-resi" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-2 mb-6 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali</span>
                     </button>
+                    <button type="button" onclick="navigateTo('admin-input-resi-report')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                        <span>View Laporan</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ADMIN • INPUT RESI PICKER</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700">Picker Log</span>
+                        </div>
+
+                        <form id="admin-resi-form" class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-date" class="text-sm font-bold text-slate-800">Tanggal</label>
+                                    <span class="text-xs text-slate-400">default hari ini</span>
+                                </div>
+                                <input type="date" id="admin-resi-date" onchange="renderAdminResiStatsAndList()" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                            </div>
+
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-picker-search" class="text-sm font-bold text-slate-800">Nama Picker</label>
+                                    <span id="admin-resi-picker-role-badge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700"></span>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" id="admin-resi-picker-search" autocomplete="off" required
+                                        onfocus="showAdminResiPickerDropdown()" oninput="filterAdminResiPickerDropdown()"
+                                        placeholder="Ketik untuk mencari nama picker..."
+                                        class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                                    <button type="button" id="clear-admin-resi-picker-btn" onclick="clearAdminResiPickerSelection()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="admin-resi-picker">
+                                <div id="admin-resi-picker-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-expedisi" class="text-sm font-bold text-slate-800">Nama Expedisi</label>
+                                </div>
+                                <select id="admin-resi-expedisi" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                                    <option value="">— Pilih Expedisi —</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-qty" class="text-sm font-bold text-slate-800">Jumlah Resi</label>
+                                </div>
+                                <input type="number" id="admin-resi-qty" min="1" placeholder="0" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                            </div>
+
+                            <div class="pt-1">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+                                    <span>Simpan Input Resi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Kartu Ringkasan Harian -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-total-qty" class="text-2xl font-extrabold text-indigo-600 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">TOTAL RESI</div>
+                            <div id="admin-resi-stat-date-1" class="text-[10px] text-slate-400">-</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-total-entri" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">JUMLAH ENTRI</div>
+                            <div id="admin-resi-stat-date-2" class="text-[10px] text-slate-400">• -</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-avg-qty" class="text-2xl font-extrabold text-amber-600 leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">RATA-RATA</div>
+                            <div id="admin-resi-stat-date-3" class="text-[10px] text-slate-400">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Riwayat Harian -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span id="admin-resi-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">ENTRI RESI • -</span>
+                            <span id="admin-resi-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700">0 Data</span>
+                        </div>
+                        <div id="admin-resi-entries-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N2: LAPORAN ADMIN INPUT RESI          -->
+            <!-- ========================================== -->
+            <section id="view-admin-input-resi-report" class="hidden fade-in">
+                <div class="mb-5 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin-input-resi')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Input Resi</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Periode Laporan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5">PERIODE LAPORAN</div>
+
+                        <div class="flex flex-wrap gap-2 mb-3.5" id="admin-resi-report-period-buttons">
+                            <button type="button" data-period="today" onclick="setAdminResiReportPeriod('today')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-period="this_week" onclick="setAdminResiReportPeriod('this_week')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Ini
+                            </button>
+                            <button type="button" data-period="last_week" onclick="setAdminResiReportPeriod('last_week')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Lalu
+                            </button>
+                            <button type="button" data-period="this_month" onclick="setAdminResiReportPeriod('this_month')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Bulan Ini
+                            </button>
+                            <button type="button" data-period="custom" onclick="setAdminResiReportPeriod('custom')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Custom
+                            </button>
+                        </div>
+
+                        <div id="admin-resi-custom-date-box" class="hidden grid-cols-2 gap-2 mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div>
+                                <label for="admin-resi-rep-start" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                                <input type="date" id="admin-resi-rep-start" onchange="renderAdminResiReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                            <div>
+                                <label for="admin-resi-rep-end" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                                <input type="date" id="admin-resi-rep-end" onchange="renderAdminResiReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="exportAdminResiExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition">
+                            <i data-lucide="download" class="w-4 h-4 text-[#24699e]"></i>
+                            <span>Ekspor Laporan Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Ringkasan Angka -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-total" class="text-2xl font-extrabold text-[#24699e] leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">TOTAL RESI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-count" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">JUMLAH ENTRI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-avg" class="text-2xl font-extrabold text-[#c85a17] leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">RATA-RATA/ENTRI</div>
+                        </div>
+                    </div>
+
+                    <!-- Rentang Tanggal Laporan -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RENTANG TANGGAL LAPORAN</span>
+                        <span id="admin-resi-rep-date-range-badge" class="px-3.5 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#24699e] shadow-2xs">-</span>
+                    </div>
+
+                    <!-- Resi per Expedisi -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">RESI PER EXPEDISI</div>
+                        <div id="admin-resi-rep-expedisi-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Resi per Picker -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">RESI PER PICKER</div>
+                        <div id="admin-resi-rep-picker-bars" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N3: ADMIN - CATAT SALAH BARANG        -->
+            <!-- ========================================== -->
+            <section id="view-admin-salah-barang" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-2 mb-6 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali</span>
+                    </button>
+                    <button type="button" onclick="navigateTo('admin-salah-barang-report')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                        <span>View Laporan</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ADMIN • CATAT SALAH BARANG</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700">Audit Picking</span>
+                        </div>
+
+                        <form id="admin-salah-barang-form" class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-date" class="text-sm font-bold text-slate-800">Tanggal</label>
+                                    <span class="text-xs text-slate-400">default hari ini</span>
+                                </div>
+                                <input type="date" id="sb-date" onchange="renderSalahBarangDailyList()" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                            </div>
+
+                            <!-- Scan / Cari Produk dari Master Barang -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-product-search" class="text-sm font-bold text-slate-800">Scan / Cari Produk</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="sb-product-search" autocomplete="off"
+                                            onfocus="showSalahBarangProductDropdown()" oninput="filterSalahBarangProductDropdown()"
+                                            onkeydown="handleSalahBarangSearchEnter(event)"
+                                            placeholder="Scan barcode atau ketik SKU / nama..."
+                                            class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                        <button type="button" id="clear-sb-search-btn" onclick="resetSalahBarangProductSelection()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="openBarcodeCameraModal('admin_salah_barang')" class="px-3.5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-xs transition inline-flex items-center gap-1.5 shrink-0" title="Scan Kamera">
+                                        <i data-lucide="camera" class="w-4 h-4"></i>
+                                        <span>Scan</span>
+                                    </button>
+                                </div>
+                                <div id="sb-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-52 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- SKU & Nama Barang Otomatis -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="sb-sku-code" class="block text-xs font-bold text-slate-600 mb-1">SKU Code</label>
+                                    <input type="text" id="sb-sku-code" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono font-bold text-rose-700 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label for="sb-product-name" class="block text-xs font-bold text-slate-600 mb-1">Nama Barang</label>
+                                    <input type="text" id="sb-product-name" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-not-allowed">
+                                </div>
+                            </div>
+
+                            <!-- Nama Picker (Bisa diketik cari) -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-picker-search" class="text-sm font-bold text-slate-800">Nama Picker</label>
+                                    <span id="sb-picker-role-badge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700"></span>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" id="sb-picker-search" autocomplete="off" required
+                                        onfocus="showSalahBarangPickerDropdown()" oninput="filterSalahBarangPickerDropdown()"
+                                        placeholder="Ketik untuk mencari nama picker..."
+                                        class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                    <button type="button" id="clear-sb-picker-btn" onclick="clearSalahBarangPickerSelection()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="sb-picker">
+                                <div id="sb-picker-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-qty" class="text-sm font-bold text-slate-800">Qty</label>
+                                </div>
+                                <input type="number" id="sb-qty" min="1" placeholder="0" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                            </div>
+
+                            <!-- Pilihan Alasan setelah isi Qty -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-reason" class="text-sm font-bold text-slate-800">Alasan</label>
+                                </div>
+                                <select id="sb-reason" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                    <option value="">— Pilih Alasan —</option>
+                                    <option value="Barang kurang">Barang kurang</option>
+                                    <option value="Barang lebih">Barang lebih</option>
+                                    <option value="Barang rusak">Barang rusak</option>
+                                    <option value="Salah barang">Salah barang</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-1">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold rounded-2xl shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 stroke-[2.5]"></i>
+                                    <span>Simpan Catatan Salah Barang</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Riwayat Harian Salah Barang -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span id="sb-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">RIWAYAT SALAH BARANG • -</span>
+                            <span id="sb-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700">0 Data</span>
+                        </div>
+                        <div id="sb-daily-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N4: LAPORAN ADMIN SALAH BARANG        -->
+            <!-- ========================================== -->
+            <section id="view-admin-salah-barang-report" class="hidden fade-in">
+                <div class="mb-5 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin-salah-barang')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Catat Salah Barang</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Periode Laporan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5">PERIODE LAPORAN</div>
+
+                        <div class="flex flex-wrap gap-2 mb-3.5" id="sb-report-period-buttons">
+                            <button type="button" data-period="today" onclick="setSalahBarangReportPeriod('today')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-period="this_week" onclick="setSalahBarangReportPeriod('this_week')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Ini
+                            </button>
+                            <button type="button" data-period="last_week" onclick="setSalahBarangReportPeriod('last_week')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Lalu
+                            </button>
+                            <button type="button" data-period="this_month" onclick="setSalahBarangReportPeriod('this_month')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Bulan Ini
+                            </button>
+                            <button type="button" data-period="custom" onclick="setSalahBarangReportPeriod('custom')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Custom
+                            </button>
+                        </div>
+
+                        <div id="sb-custom-date-box" class="hidden grid-cols-2 gap-2 mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div>
+                                <label for="sb-rep-start" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                                <input type="date" id="sb-rep-start" onchange="renderSalahBarangReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                            <div>
+                                <label for="sb-rep-end" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                                <input type="date" id="sb-rep-end" onchange="renderSalahBarangReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="exportSalahBarangExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition">
+                            <i data-lucide="download" class="w-4 h-4 text-[#24699e]"></i>
+                            <span>Ekspor Laporan Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Ringkasan Angka -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-total-qty" class="text-2xl font-extrabold text-[#24699e] leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">TOTAL QTY SALAH</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-total-case" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">JUMLAH ENTRI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-avg-qty" class="text-2xl font-extrabold text-[#c85a17] leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">RATA-RATA/ENTRI</div>
+                        </div>
+                    </div>
+
+                    <!-- Rentang Tanggal Laporan -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RENTANG TANGGAL LAPORAN</span>
+                        <span id="sb-rep-date-range-badge" class="px-3.5 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#24699e] shadow-2xs">-</span>
+                    </div>
+
+                    <!-- Salah Barang per Produk / SKU -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">SALAH BARANG PER PRODUK</div>
+                        <div id="sb-rep-product-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Salah Barang per Picker -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">SALAH BARANG PER PICKER</div>
+                        <div id="sb-rep-picker-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Rekap per Alasan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">REKAP PER ALASAN</div>
+                        <div id="sb-rep-reason-bars" class="space-y-4"></div>
+                    </div>
                 </div>
             </section>
 
@@ -3142,6 +3613,7 @@ function doPost(e) {
                 name: 'Susu UHT Full Cream 1L',
                 picker: 'Rizik',
                 qty: 2,
+                reason: 'Salah barang',
                 timestamp: '11:20',
                 createdBy: 'Fia'
             }
@@ -3267,8 +3739,8 @@ function doPost(e) {
 
             await postToGoogleSheet(
                 'SalahBarang',
-                ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'],
-                salahBarangEntries.map(i => [i.id, i.date, i.timestamp, i.sku, i.barcode || '-', i.name, i.picker, i.qty, i.createdBy]),
+                ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Alasan', 'Admin Input'],
+                salahBarangEntries.map(i => [i.id, i.date, i.timestamp, i.sku, i.barcode || '-', i.name, i.picker, i.qty, i.reason || 'Salah barang', i.createdBy]),
                 'replace_all'
             );
 
@@ -4666,6 +5138,11 @@ function doPost(e) {
                 initLaporanTerpaduView();
             } else if (route === 'admin') {
                 document.getElementById('view-admin').classList.remove('hidden');
+                const today = getTodayISO();
+                const resiBadge = document.getElementById('admin-menu-resi-badge');
+                const sbBadge = document.getElementById('admin-menu-sb-badge');
+                if (resiBadge) resiBadge.textContent = `${adminResiEntries.filter(i => i.date === today).length} Hari Ini`;
+                if (sbBadge) sbBadge.textContent = `${salahBarangEntries.filter(i => i.date === today).length} Hari Ini`;
             } else if (route === 'admin-input-resi') {
                 document.getElementById('view-admin-input-resi').classList.remove('hidden');
                 initAdminInputResiView();
@@ -6304,16 +6781,101 @@ function doPost(e) {
         function initAdminInputResiView() {
             const d = document.getElementById('admin-resi-date');
             if (d && !d.value) d.value = getTodayISO();
-            const pickerSel = document.getElementById('admin-resi-picker');
-            pickerSel.innerHTML = `<option value="">— Pilih Nama Picker —</option>` +
-                [...usersData].sort((a, b) => a.username.localeCompare(b.username, 'id'))
-                    .map(u => `<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+            clearAdminResiPickerSelection();
             const expSel = document.getElementById('admin-resi-expedisi');
             expSel.innerHTML = `<option value="">— Pilih Expedisi —</option>` +
                 [...expedisiData].sort((a, b) => a.name.localeCompare(b.name, 'id'))
                     .map(e => `<option value="${e.name}">${e.name}</option>`).join('');
             renderAdminResiStatsAndList();
         }
+
+        function showAdminResiPickerDropdown() {
+            filterAdminResiPickerDropdown();
+            document.getElementById('admin-resi-picker-dropdown')?.classList.remove('hidden');
+        }
+
+        function filterAdminResiPickerDropdown() {
+            const input = document.getElementById('admin-resi-picker-search');
+            const dropdown = document.getElementById('admin-resi-picker-dropdown');
+            const hiddenVal = document.getElementById('admin-resi-picker');
+            if (!input || !dropdown) return;
+
+            const q = (input.value || '').toLowerCase().trim();
+            if (hiddenVal && hiddenVal.value.toLowerCase() !== q) {
+                hiddenVal.value = '';
+                document.getElementById('admin-resi-picker-role-badge')?.classList.add('hidden');
+            }
+            document.getElementById('clear-admin-resi-picker-btn')?.classList.toggle('hidden', input.value.length === 0);
+
+            const matches = [...usersData].sort((a, b) => a.username.localeCompare(b.username, 'id'))
+                .filter(u => u.username.toLowerCase().includes(q) || u.role.toLowerCase().includes(q));
+
+            dropdown.innerHTML = matches.length === 0
+                ? `<div class="p-3 text-xs text-slate-400 text-center">Nama picker tidak ditemukan.</div>`
+                : matches.map(u => `
+                    <button type="button" onclick="selectAdminResiPicker('${u.username}', '${u.role}')"
+                        class="w-full px-4 py-2.5 text-left hover:bg-indigo-50 flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">${u.username}</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">${u.role}</span>
+                    </button>
+                `).join('');
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectAdminResiPicker(name, role) {
+            const searchInput = document.getElementById('admin-resi-picker-search');
+            const hiddenInput = document.getElementById('admin-resi-picker');
+            const badge = document.getElementById('admin-resi-picker-role-badge');
+            if (searchInput) searchInput.value = name;
+            if (hiddenInput) hiddenInput.value = name;
+            if (badge) {
+                badge.textContent = role;
+                badge.classList.remove('hidden');
+            }
+            document.getElementById('clear-admin-resi-picker-btn')?.classList.remove('hidden');
+            document.getElementById('admin-resi-picker-dropdown')?.classList.add('hidden');
+        }
+
+        function clearAdminResiPickerSelection() {
+            const searchInput = document.getElementById('admin-resi-picker-search');
+            const hiddenInput = document.getElementById('admin-resi-picker');
+            const badge = document.getElementById('admin-resi-picker-role-badge');
+            if (searchInput) searchInput.value = '';
+            if (hiddenInput) hiddenInput.value = '';
+            if (badge) badge.classList.add('hidden');
+            document.getElementById('clear-admin-resi-picker-btn')?.classList.add('hidden');
+            document.getElementById('admin-resi-picker-dropdown')?.classList.add('hidden');
+        }
+
+        document.getElementById('admin-resi-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const date = document.getElementById('admin-resi-date').value || getTodayISO();
+            const selectedPicker = document.getElementById('admin-resi-picker').value.trim();
+            const typedPicker = document.getElementById('admin-resi-picker-search').value.trim();
+            const matchedUser = usersData.find(u => u.username.toLowerCase() === (selectedPicker || typedPicker).toLowerCase());
+            const picker = matchedUser ? matchedUser.username : (selectedPicker || typedPicker);
+            const expedisi = document.getElementById('admin-resi-expedisi').value;
+            const qty = parseInt(document.getElementById('admin-resi-qty').value, 10);
+
+            if (!picker || !expedisi || !qty || qty < 1) {
+                showToast('Lengkapi Nama Picker, Nama Expedisi, dan Jumlah Resi.', 'warning');
+                return;
+            }
+
+            const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+            const newId = 'AR-' + Date.now().toString().slice(-5);
+            const createdBy = currentUser ? currentUser.username : 'Admin';
+
+            adminResiEntries.unshift({ id: newId, date, picker, expedisi, qty, timestamp: nowTime, createdBy });
+            saveAppStateToLocal();
+            postToGoogleSheet('AdminResi', ['ID', 'Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'], [[newId, date, nowTime, picker, expedisi, qty, createdBy]], 'insert');
+
+            clearAdminResiPickerSelection();
+            document.getElementById('admin-resi-expedisi').value = '';
+            document.getElementById('admin-resi-qty').value = '';
+            renderAdminResiStatsAndList();
+            showToast(`Input resi ${picker} (${expedisi}: ${qty}) berhasil disimpan!`, 'success');
+        });
 
         function renderAdminResiStatsAndList() {
             const date = document.getElementById('admin-resi-date')?.value || getTodayISO();
@@ -6340,81 +6902,99 @@ function doPost(e) {
                             <div class="text-xs font-extrabold text-slate-800">${i.picker} • ${i.expedisi}</div>
                             <div class="text-[11px] text-slate-400">${formatDateIndo(i.date)} ${i.timestamp} • Admin: ${i.createdBy}</div>
                         </div>
-                        <span class="text-sm font-extrabold text-indigo-600">${i.qty}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm font-extrabold text-indigo-600">${i.qty}</span>
+                            <button type="button" onclick="deleteAdminResiEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded" title="Hapus">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
                     </div>
-                `).join('');
-        }
-
-        document.getElementById('admin-resi-form')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const date = document.getElementById('admin-resi-date').value || getTodayISO();
-            const picker = document.getElementById('admin-resi-picker').value;
-            const expedisi = document.getElementById('admin-resi-expedisi').value;
-            const qty = parseInt(document.getElementById('admin-resi-qty').value, 10);
-            if (!picker || !expedisi || !qty || qty < 1) {
-                showToast('Lengkapi Nama Picker, Expedisi, dan Jumlah Resi.', 'warning');
-                return;
-            }
-            const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-            const newId = 'AR-' + Date.now().toString().slice(-5);
-            const createdBy = currentUser ? currentUser.username : 'Admin';
-            adminResiEntries.unshift({ id: newId, date, picker, expedisi, qty, timestamp: nowTime, createdBy });
-            postToGoogleSheet('AdminResi', ['ID', 'Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'], [[newId, date, nowTime, picker, expedisi, qty, createdBy]], 'insert');
-            document.getElementById('admin-resi-picker').value = '';
-            document.getElementById('admin-resi-expedisi').value = '';
-            document.getElementById('admin-resi-qty').value = '';
-            renderAdminResiStatsAndList();
-            showToast('Input Resi Admin berhasil disimpan!', 'success');
-        });
-
-        function initAdminInputResiReportView() {
-            const s = document.getElementById('admin-resi-rep-start');
-            const e = document.getElementById('admin-resi-rep-end');
-            if (s && !s.value) s.value = getTodayISO();
-            if (e && !e.value) e.value = getTodayISO();
-            renderAdminResiReport();
-        }
-
-        function renderAdminResiReport() {
-            const start = document.getElementById('admin-resi-rep-start')?.value || '';
-            const end = document.getElementById('admin-resi-rep-end')?.value || '';
-            const q = (document.getElementById('admin-resi-rep-search')?.value || '').toLowerCase().trim();
-            const filtered = adminResiEntries.filter(i =>
-                (!start || i.date >= start) && (!end || i.date <= end) &&
-                (!q || i.picker.toLowerCase().includes(q) || i.expedisi.toLowerCase().includes(q))
-            );
-            const total = filtered.reduce((s, i) => s + Number(i.qty || 0), 0);
-            const pickerMap = {};
-            filtered.forEach(i => { pickerMap[i.picker] = (pickerMap[i.picker] || 0) + Number(i.qty || 0); });
-            const topPicker = Object.entries(pickerMap).sort((a, b) => b[1] - a[1])[0];
-
-            document.getElementById('admin-resi-rep-total').textContent = total.toLocaleString('id-ID');
-            document.getElementById('admin-resi-rep-count').textContent = filtered.length;
-            document.getElementById('admin-resi-rep-top-picker').textContent = topPicker ? `${topPicker[0]} (${topPicker[1]})` : '-';
-
-            const tbody = document.getElementById('admin-resi-rep-tbody');
-            tbody.innerHTML = filtered.length === 0
-                ? `<tr><td colspan="6" class="py-8 text-center text-slate-400">Belum ada data pada filter ini.</td></tr>`
-                : filtered.map(i => `
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="py-3 px-4 font-mono text-slate-600">${formatDateIndo(i.date)} ${i.timestamp}</td>
-                        <td class="py-3 px-4 font-bold text-slate-800">${i.picker}</td>
-                        <td class="py-3 px-4 font-semibold text-indigo-700">${i.expedisi}</td>
-                        <td class="py-3 px-4 text-right font-extrabold">${i.qty}</td>
-                        <td class="py-3 px-4 text-slate-500">${i.createdBy}</td>
-                        <td class="py-3 px-4 text-right">
-                            <button type="button" onclick="deleteAdminResiEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </td>
-                    </tr>
                 `).join('');
             lucide.createIcons();
         }
 
         function deleteAdminResiEntry(id) {
             adminResiEntries = adminResiEntries.filter(i => i.id !== id);
+            saveAppStateToLocal();
             postToGoogleSheet('AdminResi', [], [], 'delete', { id });
             renderAdminResiReport();
             renderAdminResiStatsAndList();
+            showToast('Data input resi dihapus.', 'info');
+        }
+
+        let currentAdminResiReportPeriod = 'today';
+
+        function initAdminInputResiReportView() {
+            setAdminResiReportPeriod(currentAdminResiReportPeriod);
+        }
+
+        function setAdminResiReportPeriod(period) {
+            currentAdminResiReportPeriod = period;
+            document.querySelectorAll('.admin-resi-period-btn').forEach(btn => {
+                const active = btn.dataset.period === period;
+                btn.className = active
+                    ? 'admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs'
+                    : 'admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
+            });
+            const customBox = document.getElementById('admin-resi-custom-date-box');
+            if (customBox) {
+                if (period === 'custom') {
+                    customBox.classList.remove('hidden');
+                    customBox.classList.add('grid');
+                    if (!document.getElementById('admin-resi-rep-start').value) document.getElementById('admin-resi-rep-start').value = getTodayISO();
+                    if (!document.getElementById('admin-resi-rep-end').value) document.getElementById('admin-resi-rep-end').value = getTodayISO();
+                } else {
+                    customBox.classList.add('hidden');
+                    customBox.classList.remove('grid');
+                }
+            }
+            renderAdminResiReport();
+        }
+
+        function renderAdminResiReport() {
+            const { start, end } = getDateRangeForPeriod(
+                currentAdminResiReportPeriod,
+                document.getElementById('admin-resi-rep-start')?.value,
+                document.getElementById('admin-resi-rep-end')?.value
+            );
+            const filtered = adminResiEntries.filter(i => i.date >= start && i.date <= end);
+            const totalResi = filtered.reduce((s, i) => s + Number(i.qty || 0), 0);
+            const avg = filtered.length > 0 ? (totalResi / filtered.length).toFixed(1).replace('.', ',') : '0,0';
+
+            const totalEl = document.getElementById('admin-resi-rep-total');
+            const countEl = document.getElementById('admin-resi-rep-count');
+            const avgEl = document.getElementById('admin-resi-rep-avg');
+            const badgeEl = document.getElementById('admin-resi-rep-date-range-badge');
+
+            if (totalEl) totalEl.textContent = totalResi.toLocaleString('id-ID');
+            if (countEl) countEl.textContent = filtered.length;
+            if (avgEl) avgEl.textContent = avg;
+            if (badgeEl) {
+                badgeEl.textContent = start === end ? formatDateIndo(start) : `${formatDateIndo(start)} - ${formatDateIndo(end)}`;
+            }
+
+            const expMap = {};
+            const pickerMap = {};
+            filtered.forEach(i => {
+                expMap[i.expedisi] = (expMap[i.expedisi] || 0) + Number(i.qty || 0);
+                pickerMap[i.picker] = (pickerMap[i.picker] || 0) + Number(i.qty || 0);
+            });
+
+            renderHorizontalBars('admin-resi-rep-expedisi-bars', expMap, 'resi', 'bg-[#24699e]');
+            renderHorizontalBars('admin-resi-rep-picker-bars', pickerMap, 'resi', 'bg-[#c85a17]');
+        }
+
+        function exportAdminResiExcel() {
+            const { start, end } = getDateRangeForPeriod(
+                currentAdminResiReportPeriod,
+                document.getElementById('admin-resi-rep-start')?.value,
+                document.getElementById('admin-resi-rep-end')?.value
+            );
+            const filtered = adminResiEntries.filter(i => i.date >= start && i.date <= end);
+            const headers = ['Tanggal', 'Jam', 'Nama Picker', 'Nama Expedisi', 'Jumlah Resi', 'Admin Input'];
+            const rows = filtered.map(i => [i.date, i.timestamp, i.picker, i.expedisi, i.qty, i.createdBy]);
+            downloadCsvFile(`Laporan_Admin_Input_Resi_${start}_${end}.csv`, headers, rows);
+            showToast('Laporan Admin Input Resi berhasil diekspor!', 'success');
         }
 
         function exportAdminResiCsv() {
@@ -6427,11 +7007,66 @@ function doPost(e) {
         function initAdminSalahBarangView() {
             const d = document.getElementById('sb-date');
             if (d && !d.value) d.value = getTodayISO();
-            const pickerSel = document.getElementById('sb-picker');
-            pickerSel.innerHTML = `<option value="">— Pilih Nama Picker —</option>` +
-                [...usersData].sort((a, b) => a.username.localeCompare(b.username, 'id'))
-                    .map(u => `<option value="${u.username}">${u.username} (${u.role})</option>`).join('');
+            clearSalahBarangPickerSelection();
             renderSalahBarangDailyList();
+        }
+
+        function showSalahBarangPickerDropdown() {
+            filterSalahBarangPickerDropdown();
+            document.getElementById('sb-picker-dropdown')?.classList.remove('hidden');
+        }
+
+        function filterSalahBarangPickerDropdown() {
+            const input = document.getElementById('sb-picker-search');
+            const dropdown = document.getElementById('sb-picker-dropdown');
+            const hiddenVal = document.getElementById('sb-picker');
+            if (!input || !dropdown) return;
+
+            const q = (input.value || '').toLowerCase().trim();
+            if (hiddenVal && hiddenVal.value.toLowerCase() !== q) {
+                hiddenVal.value = '';
+                document.getElementById('sb-picker-role-badge')?.classList.add('hidden');
+            }
+            document.getElementById('clear-sb-picker-btn')?.classList.toggle('hidden', input.value.length === 0);
+
+            const matches = [...usersData].sort((a, b) => a.username.localeCompare(b.username, 'id'))
+                .filter(u => u.username.toLowerCase().includes(q) || u.role.toLowerCase().includes(q));
+
+            dropdown.innerHTML = matches.length === 0
+                ? `<div class="p-3 text-xs text-slate-400 text-center">Nama picker tidak ditemukan.</div>`
+                : matches.map(u => `
+                    <button type="button" onclick="selectSalahBarangPicker('${u.username}', '${u.role}')"
+                        class="w-full px-4 py-2.5 text-left hover:bg-rose-50 flex items-center justify-between text-xs">
+                        <span class="font-bold text-slate-800">${u.username}</span>
+                        <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold">${u.role}</span>
+                    </button>
+                `).join('');
+            dropdown.classList.remove('hidden');
+        }
+
+        function selectSalahBarangPicker(name, role) {
+            const searchInput = document.getElementById('sb-picker-search');
+            const hiddenInput = document.getElementById('sb-picker');
+            const badge = document.getElementById('sb-picker-role-badge');
+            if (searchInput) searchInput.value = name;
+            if (hiddenInput) hiddenInput.value = name;
+            if (badge) {
+                badge.textContent = role;
+                badge.classList.remove('hidden');
+            }
+            document.getElementById('clear-sb-picker-btn')?.classList.remove('hidden');
+            document.getElementById('sb-picker-dropdown')?.classList.add('hidden');
+        }
+
+        function clearSalahBarangPickerSelection() {
+            const searchInput = document.getElementById('sb-picker-search');
+            const hiddenInput = document.getElementById('sb-picker');
+            const badge = document.getElementById('sb-picker-role-badge');
+            if (searchInput) searchInput.value = '';
+            if (hiddenInput) hiddenInput.value = '';
+            if (badge) badge.classList.add('hidden');
+            document.getElementById('clear-sb-picker-btn')?.classList.add('hidden');
+            document.getElementById('sb-picker-dropdown')?.classList.add('hidden');
         }
 
         function showSalahBarangProductDropdown() {
@@ -6495,10 +7130,14 @@ function doPost(e) {
         document.getElementById('admin-salah-barang-form')?.addEventListener('submit', function(e) {
             e.preventDefault();
             const date = document.getElementById('sb-date').value || getTodayISO();
-            const picker = document.getElementById('sb-picker').value;
+            const selectedPicker = document.getElementById('sb-picker').value.trim();
+            const typedPicker = document.getElementById('sb-picker-search').value.trim();
+            const matchedUser = usersData.find(u => u.username.toLowerCase() === (selectedPicker || typedPicker).toLowerCase());
+            const picker = matchedUser ? matchedUser.username : (selectedPicker || typedPicker);
             const qty = parseInt(document.getElementById('sb-qty').value, 10);
-            if (!selectedSalahBarangProduct || !picker || !qty || qty < 1) {
-                showToast('Pilih Barang, Nama Picker, dan Qty yang valid.', 'warning');
+            const reason = document.getElementById('sb-reason').value;
+            if (!selectedSalahBarangProduct || !picker || !qty || qty < 1 || !reason) {
+                showToast('Lengkapi Barang, Nama Picker, Qty, dan Alasan.', 'warning');
                 return;
             }
             const nowTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
@@ -6506,14 +7145,16 @@ function doPost(e) {
             const createdBy = currentUser ? currentUser.username : 'Admin';
             salahBarangEntries.unshift({
                 id: newId, date, sku: selectedSalahBarangProduct.sku, barcode: selectedSalahBarangProduct.barcode,
-                name: selectedSalahBarangProduct.name, picker, qty, timestamp: nowTime, createdBy
+                name: selectedSalahBarangProduct.name, picker, qty, reason, timestamp: nowTime, createdBy
             });
-            postToGoogleSheet('SalahBarang', ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'], [[newId, date, nowTime, selectedSalahBarangProduct.sku, selectedSalahBarangProduct.barcode || '-', selectedSalahBarangProduct.name, picker, qty, createdBy]], 'insert');
+            saveAppStateToLocal();
+            postToGoogleSheet('SalahBarang', ['ID', 'Tanggal', 'Jam', 'Kode SKU', 'Barcode', 'Nama Barang', 'Nama Picker', 'Qty', 'Alasan', 'Admin Input'], [[newId, date, nowTime, selectedSalahBarangProduct.sku, selectedSalahBarangProduct.barcode || '-', selectedSalahBarangProduct.name, picker, qty, reason, createdBy]], 'insert');
             resetSalahBarangProductSelection();
-            document.getElementById('sb-picker').value = '';
+            clearSalahBarangPickerSelection();
             document.getElementById('sb-qty').value = '';
+            document.getElementById('sb-reason').value = '';
             renderSalahBarangDailyList();
-            showToast('Data Salah Barang berhasil disimpan!', 'success');
+            showToast(`Catatan "${reason}" untuk ${picker} berhasil disimpan!`, 'success');
         });
 
         function renderSalahBarangDailyList() {
@@ -6527,55 +7168,20 @@ function doPost(e) {
                 : list.map(i => `
                     <div class="py-3 flex items-start justify-between gap-3">
                         <div>
-                            <div class="text-xs font-mono font-bold text-rose-700">${i.sku} • Picker: ${i.picker}</div>
-                            <div class="text-xs font-semibold text-slate-800">${i.name}</div>
-                            <div class="text-[11px] text-slate-400">${i.time} • Admin: ${i.createdBy}</div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="text-xs font-mono font-bold text-rose-700">${i.sku} • ${i.picker}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">${i.reason || 'Salah barang'}</span>
+                            </div>
+                            <div class="text-xs font-semibold text-slate-800 mt-0.5">${i.name}</div>
+                            <div class="text-[11px] text-slate-400">${i.timestamp} • Admin: ${i.createdBy}</div>
                         </div>
-                        <span class="text-xs font-extrabold text-rose-600">${i.qty} pcs</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-xs font-extrabold text-rose-600">${i.qty} pcs</span>
+                            <button type="button" onclick="deleteSalahBarangEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded" title="Hapus">
+                                <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                            </button>
+                        </div>
                     </div>
-                `).join('');
-        }
-
-        function initAdminSalahBarangReportView() {
-            const s = document.getElementById('sb-rep-start');
-            const e = document.getElementById('sb-rep-end');
-            if (s && !s.value) s.value = getTodayISO();
-            if (e && !e.value) e.value = getTodayISO();
-            renderSalahBarangReport();
-        }
-
-        function renderSalahBarangReport() {
-            const start = document.getElementById('sb-rep-start')?.value || '';
-            const end = document.getElementById('sb-rep-end')?.value || '';
-            const q = (document.getElementById('sb-rep-search')?.value || '').toLowerCase().trim();
-            const filtered = salahBarangEntries.filter(i =>
-                (!start || i.date >= start) && (!end || i.date <= end) &&
-                (!q || i.sku.toLowerCase().includes(q) || i.name.toLowerCase().includes(q) || i.picker.toLowerCase().includes(q))
-            );
-            const totalQty = filtered.reduce((s, i) => s + Number(i.qty || 0), 0);
-            const pickerMap = {};
-            filtered.forEach(i => { pickerMap[i.picker] = (pickerMap[i.picker] || 0) + Number(i.qty || 0); });
-            const topPicker = Object.entries(pickerMap).sort((a, b) => b[1] - a[1])[0];
-
-            document.getElementById('sb-rep-total-qty').textContent = totalQty.toLocaleString('id-ID');
-            document.getElementById('sb-rep-total-case').textContent = filtered.length;
-            document.getElementById('sb-rep-top-picker').textContent = topPicker ? `${topPicker[0]} (${topPicker[1]})` : '-';
-
-            const tbody = document.getElementById('sb-rep-tbody');
-            tbody.innerHTML = filtered.length === 0
-                ? `<tr><td colspan="7" class="py-8 text-center text-slate-400">Belum ada data pada filter ini.</td></tr>`
-                : filtered.map(i => `
-                    <tr class="hover:bg-slate-50/80">
-                        <td class="py-3 px-4 font-mono text-slate-600">${formatDateIndo(i.date)} ${i.timestamp}</td>
-                        <td class="py-3 px-4 font-mono font-bold text-rose-700">${i.sku}</td>
-                        <td class="py-3 px-4 font-semibold text-slate-800">${i.name}</td>
-                        <td class="py-3 px-4 font-bold text-slate-700">${i.picker}</td>
-                        <td class="py-3 px-4 text-right font-extrabold text-rose-600">${i.qty}</td>
-                        <td class="py-3 px-4 text-slate-500">${i.createdBy}</td>
-                        <td class="py-3 px-4 text-right">
-                            <button type="button" onclick="deleteSalahBarangEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
-                        </td>
-                    </tr>
                 `).join('');
             lucide.createIcons();
         }
@@ -6585,12 +7191,91 @@ function doPost(e) {
             postToGoogleSheet('SalahBarang', [], [], 'delete', { id });
             renderSalahBarangReport();
             renderSalahBarangDailyList();
+            showToast('Data salah barang dihapus.', 'info');
+        }
+
+        let currentSalahBarangReportPeriod = 'today';
+
+        function initAdminSalahBarangReportView() {
+            setSalahBarangReportPeriod(currentSalahBarangReportPeriod);
+        }
+
+        function setSalahBarangReportPeriod(period) {
+            currentSalahBarangReportPeriod = period;
+            document.querySelectorAll('.sb-period-btn').forEach(btn => {
+                const active = btn.dataset.period === period;
+                btn.className = active
+                    ? 'sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs'
+                    : 'sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50';
+            });
+            const customBox = document.getElementById('sb-custom-date-box');
+            if (customBox) {
+                if (period === 'custom') {
+                    customBox.classList.remove('hidden');
+                    customBox.classList.add('grid');
+                    if (!document.getElementById('sb-rep-start').value) document.getElementById('sb-rep-start').value = getTodayISO();
+                    if (!document.getElementById('sb-rep-end').value) document.getElementById('sb-rep-end').value = getTodayISO();
+                } else {
+                    customBox.classList.add('hidden');
+                    customBox.classList.remove('grid');
+                }
+            }
+            renderSalahBarangReport();
+        }
+
+        function renderSalahBarangReport() {
+            const { start, end } = getDateRangeForPeriod(
+                currentSalahBarangReportPeriod,
+                document.getElementById('sb-rep-start')?.value,
+                document.getElementById('sb-rep-end')?.value
+            );
+            const filtered = salahBarangEntries.filter(i => i.date >= start && i.date <= end);
+            const totalQty = filtered.reduce((s, i) => s + Number(i.qty || 0), 0);
+            const avg = filtered.length > 0 ? (totalQty / filtered.length).toFixed(1).replace('.', ',') : '0,0';
+
+            const totalQtyEl = document.getElementById('sb-rep-total-qty');
+            const totalCaseEl = document.getElementById('sb-rep-total-case');
+            const avgEl = document.getElementById('sb-rep-avg-qty');
+            const badgeEl = document.getElementById('sb-rep-date-range-badge');
+
+            if (totalQtyEl) totalQtyEl.textContent = totalQty.toLocaleString('id-ID');
+            if (totalCaseEl) totalCaseEl.textContent = filtered.length;
+            if (avgEl) avgEl.textContent = avg;
+            if (badgeEl) {
+                badgeEl.textContent = start === end ? formatDateIndo(start) : `${formatDateIndo(start)} - ${formatDateIndo(end)}`;
+            }
+
+            const productMap = {};
+            const pickerMap = {};
+            const reasonMap = {};
+            filtered.forEach(i => {
+                const prodLabel = `${i.sku} • ${i.name}`;
+                productMap[prodLabel] = (productMap[prodLabel] || 0) + Number(i.qty || 0);
+                pickerMap[i.picker] = (pickerMap[i.picker] || 0) + Number(i.qty || 0);
+                const rsn = i.reason || 'Salah barang';
+                reasonMap[rsn] = (reasonMap[rsn] || 0) + Number(i.qty || 0);
+            });
+
+            renderHorizontalBars('sb-rep-product-bars', productMap, 'pcs', 'bg-[#24699e]');
+            renderHorizontalBars('sb-rep-picker-bars', pickerMap, 'pcs', 'bg-[#c85a17]');
+            renderHorizontalBars('sb-rep-reason-bars', reasonMap, 'pcs', 'bg-rose-600');
+        }
+
+        function exportSalahBarangExcel() {
+            const { start, end } = getDateRangeForPeriod(
+                currentSalahBarangReportPeriod,
+                document.getElementById('sb-rep-start')?.value,
+                document.getElementById('sb-rep-end')?.value
+            );
+            const filtered = salahBarangEntries.filter(i => i.date >= start && i.date <= end);
+            const headers = ['Tanggal', 'Jam', 'Kode SKU', 'Nama Barang', 'Nama Picker', 'Qty', 'Alasan', 'Admin Input'];
+            const rows = filtered.map(i => [i.date, i.timestamp, i.sku, i.name, i.picker, i.qty, i.reason || 'Salah barang', i.createdBy]);
+            downloadCsvFile(`Laporan_Admin_Salah_Barang_${start}_${end}.csv`, headers, rows);
+            showToast('Laporan Admin Salah Barang berhasil diekspor!', 'success');
         }
 
         function exportSalahBarangCsv() {
-            downloadCsvFile(`Report_Admin_Salah_Barang_${getTodayISO()}.csv`, ['Tanggal', 'Jam', 'Kode SKU', 'Nama Barang', 'Nama Picker', 'Qty', 'Admin Input'],
-                salahBarangEntries.map(i => [i.date, i.timestamp, i.sku, i.name, i.picker, i.qty, i.createdBy]));
-            showToast('Report Admin Salah Barang diekspor!', 'success');
+            exportSalahBarangExcel();
         }
 
         // Kamera Pemindai Barcode
