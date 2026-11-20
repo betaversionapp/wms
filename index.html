@@ -1617,7 +1617,6 @@ function doPost(e) {
                                     <label for="cc-gudang-sumber" class="text-xs font-bold text-slate-700">
                                         Gudang Sumber <span class="text-rose-500">*</span>
                                     </label>
-                                    <span class="text-[11px] text-slate-400">DM / GR / GPACK / PM</span>
                                 </div>
                                 <select id="cc-gudang-sumber" required
                                     class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
@@ -1662,14 +1661,14 @@ function doPost(e) {
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label for="cc-sku-code" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        SKU Code <span class="text-slate-400 font-normal">(Otomatis)</span>
+                                        SKU Code
                                     </label>
                                     <input type="text" id="cc-sku-code" readonly value="-"
                                         class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-bold text-purple-700 cursor-not-allowed focus:outline-none">
                                 </div>
                                 <div>
                                     <label for="cc-product-name" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        Nama Product <span class="text-slate-400 font-normal">(Otomatis)</span>
+                                        Nama Product
                                     </label>
                                     <input type="text" id="cc-product-name" readonly value="-"
                                         class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 cursor-not-allowed focus:outline-none">
@@ -1692,18 +1691,18 @@ function doPost(e) {
                                 </div>
                             </div>
 
-                            <!-- No Rack (Bisa Diedit) & Expiry Date (Bisa Diedit) -->
+                            <!-- No Rack & Expiry Date -->
                             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div>
                                     <label for="cc-no-rack" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        No Rack <span class="text-purple-600 font-normal">(Bisa Diedit)</span>
+                                        No Rack
                                     </label>
                                     <input type="text" id="cc-no-rack" placeholder="Contoh: R-A01"
                                         class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono uppercase text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
                                 </div>
                                 <div>
                                     <label for="cc-expiry-date" class="block text-xs font-bold text-slate-700 mb-1.5">
-                                        Expired Date <span class="text-purple-600 font-normal">(Bisa Diedit)</span>
+                                        Expired Date
                                     </label>
                                     <input type="date" id="cc-expiry-date"
                                         class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
@@ -1888,10 +1887,6 @@ function doPost(e) {
                             <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekapitulasi hasil hitung fisik stok gudang berdasarkan filter tanggal, gudang sumber, dan produk.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button type="button" onclick="syncCycleCountToGoogleSheet()" class="inline-flex items-center gap-2 px-3.5 py-2.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded-xl text-xs font-bold transition">
-                                <i data-lucide="cloud-upload" class="w-4 h-4"></i>
-                                <span>Sync Sheet</span>
-                            </button>
                             <button type="button" onclick="exportCycleCountCsv()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition">
                                 <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
                                 <span>Export Excel / CSV</span>
@@ -2181,6 +2176,383 @@ function doPost(e) {
             </section>
 
             <!-- ========================================== -->
+            <!-- VIEW M: MODUL LAPORAN TERPADU              -->
+            <!-- ========================================== -->
+            <section id="view-laporan" class="hidden fade-in">
+                <div class="mb-6 max-w-4xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+                <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button type="button" onclick="navigateTo('dispatch-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-amber-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Dispatch</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap resi harian, per kurir, dan per packer.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('cycle-count-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-purple-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
+                            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Cycle Count</div>
+                        <div class="text-xs text-slate-500 mt-1">Hasil hitung fisik stok per gudang sumber.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('qc-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Quality Control</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap Create, Proses, dan Transfer Jobtask QC.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('absen-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mb-3">
+                            <i data-lucide="fingerprint" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Absensi</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap kehadiran, izin, sakit, dan telat staff.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('overtime-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-amber-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Overtime</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap total jam lembur staff per periode.</div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N: MODUL ADMIN & PLACEHOLDER          -->
+            <!-- ========================================== -->
+            <section id="view-admin" class="hidden fade-in">
+                <div class="mb-6 max-w-2xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+                <div class="max-w-2xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button type="button" onclick="navigateTo('admin-input-resi')" class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-indigo-400 shadow-sm text-left transition">
+                        <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+                            <i data-lucide="file-Spreadsheet" class="w-6 h-6"></i>
+                        </div>
+                        <div class="font-bold text-slate-900">Input Resi Picker</div>
+                        <div class="text-xs text-slate-500 mt-1">Catat jumlah resi per picker dan ekspedisi.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('admin-salah-barang')" class="bg-white p-6 rounded-2xl border border-slate-200 hover:border-rose-400 shadow-sm text-left transition">
+                        <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
+                            <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                        </div>
+                        <div class="font-bold text-slate-900">Catat Salah Barang</div>
+                        <div class="text-xs text-slate-500 mt-1">Pencatatan temuan kesalahan picking barang.</div>
+                    </button>
+                </div>
+            </section>
+
+            <section id="view-module-placeholder" class="hidden fade-in">
+                <div class="max-w-md mx-auto bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 text-center">
+                    <div id="placeholder-icon-box" class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="layers" class="w-8 h-8"></i>
+                    </div>
+                    <h2 id="placeholder-title" class="text-xl font-bold text-slate-900">Modul</h2>
+                    <p id="placeholder-desc" class="text-sm text-slate-500 mt-2">Deskripsi modul operasional gudang.</p>
+                    <button onclick="navigateTo('home')" class="mt-6 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition">
+                        Kembali ke Menu Utama
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL TAMBAH / EDIT PROJECT (SESUAI GAMBAR)-->
+    <!-- ========================================== -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="folder-kanban" class="w-5 h-5 text-indigo-600"></i>
+                    <h3 id="project-modal-title" class="text-base font-bold text-slate-900">Tambah Project Baru</h3>
+                </div>
+                <button type="button" onclick="closeProjectModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+
+            <form id="project-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-project-id">
+
+                <div>
+                    <label for="form-project-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Nama Project <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="form-project-name" required placeholder="Contoh: Relokasi Rak Area B"
+                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+
+                <div>
+                    <label for="form-project-pic" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        PIC (Diambil dari Data User) <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="form-project-pic" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="form-project-duedate" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            DueDate <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="form-project-duedate" required
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="form-project-status" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Status <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="form-project-status" required
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Open">Open</option>
+                            <option value="On Progress">On Progress</option>
+                            <option value="Hold">Hold</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="form-project-notes" class="text-xs font-bold text-slate-700">Notes (Alert Penting)</label>
+                        <span class="text-[11px] font-semibold text-amber-600">Opsional • Muncul sebagai badge alert</span>
+                    </div>
+                    <textarea id="form-project-notes" rows="3" placeholder="Tulis catatan alert atau instruksi khusus project..."
+                        class="w-full px-3.5 py-2.5 bg-amber-50/40 border border-amber-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
+                </div>
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeProjectModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                        Batal
+                    </button>
+                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        Simpan Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL TAMBAH / EDIT USER & POSISI          -->
+    <!-- ========================================== -->
+    <div id="user-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
+                <h3 id="user-modal-title" class="text-base font-bold text-slate-900">Tambah User Baru</h3>
+                <button type="button" onclick="closeUserModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="user-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-user-original-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">ID User</label>
+                    <input type="text" id="form-user-id" required class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Username</label>
+                    <input type="text" id="form-user-username" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                    <input type="text" id="form-user-password" required class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Posisi</label>
+                    <select id="form-user-role" onchange="updateModalRolePreview()" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold"></select>
+                </div>
+                <div class="p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
+                    <div class="text-[11px] font-bold text-indigo-800 mb-1.5">Menu Otomatis Terbuka:</div>
+                    <div id="modal-role-menus-preview" class="flex flex-wrap gap-1"></div>
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeUserModal()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Simpan User</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL KELOLA POSISI & HAK AKSES            -->
+    <!-- ========================================== -->
+    <div id="role-manager-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-indigo-50 border-b border-indigo-100 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Kelola Posisi &amp; Hak Akses Menu</h3>
+                <button type="button" onclick="closeRoleManagerModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-5">
+                <form id="add-role-form" class="p-4 rounded-xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex gap-2">
+                        <input type="text" id="new-role-name" required placeholder="Nama Posisi Baru (misal: Leader)" class="flex-1 px-3.5 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                        <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Tambah Posisi</button>
+                    </div>
+                    <div id="new-role-menus-checkboxes" class="grid grid-cols-2 sm:grid-cols-3 gap-2"></div>
+                </form>
+                <div id="existing-roles-list" class="space-y-3"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL KELOLA MENU & REASON                 -->
+    <!-- ========================================== -->
+    <div id="menu-manager-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Kelola Menu Aplikasi</h3>
+                <button type="button" onclick="closeMenuManagerModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-4">
+                <form id="add-menu-form" class="space-y-3 p-4 bg-slate-50 rounded-xl border border-slate-200">
+                    <input type="text" id="new-menu-title" required placeholder="Nama Menu Baru" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                    <input type="text" id="new-menu-subtitle" required placeholder="Subjudul Singkat" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <select id="new-menu-icon" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs">
+                            <option value="box">Icon: Box</option>
+                            <option value="truck">Icon: Truck</option>
+                            <option value="clipboard-list">Icon: Clipboard</option>
+                            <option value="layers">Icon: Layers</option>
+                        </select>
+                        <select id="new-menu-color" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs">
+                            <option value="indigo">Warna: Indigo</option>
+                            <option value="emerald">Warna: Emerald</option>
+                            <option value="amber">Warna: Amber</option>
+                            <option value="teal">Warna: Teal</option>
+                            <option value="purple">Warna: Purple</option>
+                            <option value="rose">Warna: Rose</option>
+                        </select>
+                    </div>
+                    <label class="flex items-center gap-2 text-xs font-medium"><input type="checkbox" id="new-menu-auto-all" checked> Otomatis buka untuk Manager &amp; SPV</label>
+                    <button type="submit" class="w-full py-2 bg-indigo-600 text-white rounded-xl text-xs font-bold">Tambah Menu</button>
+                </form>
+                <div id="existing-menus-list" class="divide-y divide-slate-100 border border-slate-200 rounded-xl overflow-hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="reason-manager-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-teal-50 border-b border-teal-100 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Kelola Reason Absen</h3>
+                <button type="button" onclick="closeReasonManagerModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="add-reason-form" class="flex gap-2">
+                    <input type="text" id="new-reason-name" required placeholder="Tambah reason baru..." class="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    <button type="submit" class="px-4 py-2 bg-teal-600 text-white rounded-xl text-xs font-bold">Tambah</button>
+                </form>
+                <div id="existing-reasons-list" class="divide-y divide-slate-100 border border-slate-200 rounded-xl max-h-60 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="overtime-reason-manager-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-amber-50 border-b border-amber-100 flex items-center justify-between">
+                <h3 class="text-base font-bold text-slate-900">Kelola Reason Overtime</h3>
+                <button type="button" onclick="closeOvertimeReasonManagerModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-6 space-y-4">
+                <form id="add-overtime-reason-form" class="flex gap-2">
+                    <input type="text" id="new-overtime-reason-name" required placeholder="Tambah reason lembur..." class="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm">
+                    <button type="submit" class="px-4 py-2 bg-amber-500 text-white rounded-xl text-xs font-bold">Tambah</button>
+                </form>
+                <div id="existing-overtime-reasons-list" class="divide-y divide-slate-100 border border-slate-200 rounded-xl max-h-60 overflow-y-auto"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL TAMBAH / EDIT MASTER BARANG          -->
+    <!-- ========================================== -->
+    <div id="barang-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-purple-50 border-b border-purple-100 flex items-center justify-between">
+                <h3 id="barang-modal-title" class="text-base font-bold text-slate-900">Tambah Master Barang</h3>
+                <button type="button" onclick="closeBarangModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <form id="barang-form" class="p-6 space-y-3.5">
+                <input type="hidden" id="edit-barang-original-sku">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">SKU Code *</label>
+                        <input type="text" id="form-barang-sku" required placeholder="SKU-005" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-mono uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Barcode *</label>
+                        <input type="text" id="form-barang-barcode" required placeholder="899..." class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-mono">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Product Name *</label>
+                    <input type="text" id="form-barang-name" required placeholder="Nama lengkap produk" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Brand *</label>
+                        <input type="text" id="form-barang-brand" required placeholder="Nama Brand" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">No Rack *</label>
+                        <input type="text" id="form-barang-rack" required placeholder="R-A01" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-mono uppercase">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Expired Date</label>
+                    <input type="date" id="form-barang-expired" class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-sm">
+                </div>
+                <div class="pt-2 flex justify-end gap-2">
+                    <button type="button" onclick="closeBarangModal()" class="px-4 py-2 bg-slate-100 rounded-xl text-xs font-bold">Batal</button>
+                    <button type="submit" class="px-5 py-2 bg-purple-600 text-white rounded-xl text-xs font-bold">Simpan Barang</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL KAMERA SCAN BARCODE                  -->
+    <!-- ========================================== -->
+    <div id="barcode-camera-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-5 py-4 bg-slate-900 text-white flex items-center justify-between">
+                <span class="text-sm font-bold flex items-center gap-2"><i data-lucide="camera" class="w-4 h-4"></i> Scan Barcode Produk</span>
+                <button type="button" onclick="closeBarcodeCameraModal()" class="p-1 text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div id="html5-qrcode-reader" class="w-full rounded-xl overflow-hidden bg-slate-950 min-h-[240px]"></div>
+                <div class="relative hidden" id="native-barcode-video-wrap">
+                    <video id="barcode-camera-video" playsinline muted class="w-full rounded-xl bg-slate-950 max-h-64 object-cover"></video>
+                    <div class="pointer-events-none absolute inset-x-8 top-1/2 -translate-y-1/2 h-24 border-2 border-emerald-400/90 rounded-xl shadow-[0_0_0_9999px_rgba(15,23,42,0.45)]"></div>
+                </div>
+                <div id="barcode-camera-status" class="p-3 rounded-xl bg-amber-50 text-amber-800 text-xs">
+                    <span id="barcode-camera-status-text">Mengaktifkan kamera...</span>
+                </div>
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="text" id="manual-barcode-modal-input" onkeydown="if(event.key==='Enter'){event.preventDefault();submitManualBarcodeModal();}"
+                        placeholder="Atau ketik / tempel kode barcode di sini..."
+                        class="flex-1 px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                    <button type="button" onclick="submitManualBarcodeModal()" class="px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition">
+                        Pakai
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================== -->
     <!-- MODAL KONFIRMASI & FORM PROSES JOBTASK QC  -->
     <!-- ========================================== -->
     <div id="qc-proses-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
@@ -3837,6 +4209,47 @@ function doPost(e) {
         // ==========================================
         // CYCLE COUNT HELPER & FORM SUBMIT
         // ==========================================
+        function initCycleCountView() {
+            renderCycleCountTodayList();
+            const gudangEl = document.getElementById('cc-gudang-sumber');
+            if (gudangEl) {
+                setTimeout(() => gudangEl.focus(), 50);
+            }
+        }
+
+        function deleteCycleCountEntry(id) {
+            cycleCountEntries = cycleCountEntries.filter(i => i.id !== id);
+            saveAppStateToLocal();
+            postToGoogleSheet('CycleCount', [], [], 'delete', { id });
+            renderCycleCountTodayList();
+            renderCycleCountReport();
+            showToast('Data Cycle Count dihapus.', 'info');
+        }
+
+        function syncCycleCountToGoogleSheet() {
+            if (!setupConfig.appsScriptUrl) {
+                showToast('URL Google Apps Script belum diatur di menu Setting.', 'warning');
+                return;
+            }
+            postToGoogleSheet(
+                'CycleCount',
+                ['ID', 'Tanggal', 'Jam', 'Gudang Sumber', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Kondisi', 'Keterangan', 'Qty Fisik'],
+                cycleCountEntries.map(i => [i.id, i.date, i.time, i.gudangSumber || '-', i.sku, i.barcode, i.name, i.brand, i.noRack, i.expiryDate || '-', i.condition || 'Bagus', i.note || '-', i.qty]),
+                'replace_all'
+            );
+            showToast('Data Cycle Count berhasil disinkronkan ke Google Sheet!', 'success');
+        }
+
+        function exportCycleCountCsv() {
+            const filtered = getFilteredCycleCountEntries();
+            downloadCsvFile(
+                `Laporan_Cycle_Count_${getTodayISO()}.csv`,
+                ['Tanggal', 'Jam', 'Gudang Sumber', 'SKU Code', 'Barcode', 'Product Name', 'Brand', 'No Rack', 'Expiry Date', 'Kondisi', 'Keterangan', 'Qty Fisik'],
+                filtered.map(i => [i.date, i.time, i.gudangSumber || '-', i.sku, i.barcode, i.name, i.brand, i.noRack, i.expiryDate || '-', i.condition || 'Bagus', i.note || '-', i.qty])
+            );
+            showToast('Laporan Cycle Count berhasil diekspor!', 'success');
+        }
+
         function showCycleCountDropdown() {
             filterCycleCountDropdown();
             document.getElementById('cc-product-dropdown')?.classList.remove('hidden');
@@ -5404,6 +5817,186 @@ function doPost(e) {
             lucide.createIcons();
         }
 
+        function clearBarangSearch() {
+            const input = document.getElementById('barang-search-input');
+            if (input) input.value = '';
+            renderMasterBarangTable();
+        }
+
+        function focusBarangBarcodeScanner() {
+            openBarcodeCameraModal('master_barang');
+        }
+
+        function openBarangModal(editSku = null) {
+            const modal = document.getElementById('barang-modal');
+            if (editSku) {
+                const b = masterBarangData.find(x => x.sku === editSku);
+                if (!b) return;
+                document.getElementById('barang-modal-title').textContent = 'Edit Master Barang';
+                document.getElementById('edit-barang-original-sku').value = b.sku;
+                document.getElementById('form-barang-sku').value = b.sku;
+                document.getElementById('form-barang-barcode').value = b.barcode;
+                document.getElementById('form-barang-name').value = b.name;
+                document.getElementById('form-barang-brand').value = b.brand;
+                document.getElementById('form-barang-rack').value = b.noRack;
+                document.getElementById('form-barang-expired').value = b.expiredDate || '';
+            } else {
+                document.getElementById('barang-modal-title').textContent = 'Tambah Master Barang';
+                document.getElementById('edit-barang-original-sku').value = '';
+                document.getElementById('form-barang-sku').value = '';
+                document.getElementById('form-barang-barcode').value = '';
+                document.getElementById('form-barang-name').value = '';
+                document.getElementById('form-barang-brand').value = '';
+                document.getElementById('form-barang-rack').value = '';
+                document.getElementById('form-barang-expired').value = '';
+            }
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            lucide.createIcons();
+        }
+
+        function closeBarangModal() {
+            const modal = document.getElementById('barang-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        document.getElementById('barang-form')?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const origSku = document.getElementById('edit-barang-original-sku').value;
+            const sku = document.getElementById('form-barang-sku').value.trim().toUpperCase();
+            const barcode = document.getElementById('form-barang-barcode').value.trim();
+            const name = document.getElementById('form-barang-name').value.trim();
+            const brand = document.getElementById('form-barang-brand').value.trim();
+            const noRack = document.getElementById('form-barang-rack').value.trim().toUpperCase();
+            const expiredDate = document.getElementById('form-barang-expired').value;
+
+            if (origSku) {
+                const idx = masterBarangData.findIndex(b => b.sku === origSku);
+                if (idx !== -1) masterBarangData[idx] = { sku, barcode, name, brand, noRack, expiredDate };
+                showToast(`Barang ${sku} diperbarui!`, 'success');
+            } else {
+                masterBarangData.push({ sku, barcode, name, brand, noRack, expiredDate });
+                showToast(`Barang ${sku} ditambahkan!`, 'success');
+            }
+            saveAppStateToLocal();
+            closeBarangModal();
+            renderMasterBarangTable();
+        });
+
+        function deleteMasterBarang(sku) {
+            masterBarangData = masterBarangData.filter(b => b.sku !== sku);
+            saveAppStateToLocal();
+            renderMasterBarangTable();
+            showToast(`SKU ${sku} dihapus.`, 'info');
+        }
+
+        function exportMasterBarangExcel() {
+            downloadCsvFile(`Master_Barang_${getTodayISO()}.csv`, ['SKU Code', 'Product Name', 'Barcode', 'Brand', 'No Rack', 'Expired Date'],
+                masterBarangData.map(b => [b.sku, b.name, b.barcode, b.brand, b.noRack, b.expiredDate || '-']));
+            showToast('Master Barang diekspor ke CSV!', 'success');
+        }
+
+        function openImportBarangModal() {
+            document.getElementById('import-barang-file')?.click();
+        }
+
+        function handleImportBarangFile(event) {
+            const file = event.target.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = String(e.target.result || '').split(/\r?\n/).filter(Boolean);
+                let added = 0;
+                lines.slice(1).forEach(line => {
+                    const cols = line.split(',').map(c => c.replace(/^"|"$/g, '').trim());
+                    if (cols[0] && cols[1]) {
+                        masterBarangData.push({
+                            sku: cols[0].toUpperCase(),
+                            name: cols[1],
+                            barcode: cols[2] || '-',
+                            brand: cols[3] || '-',
+                            noRack: (cols[4] || '-').toUpperCase(),
+                            expiredDate: cols[5] || ''
+                        });
+                        added++;
+                    }
+                });
+                saveAppStateToLocal();
+                renderMasterBarangTable();
+                showToast(`${added} SKU berhasil diimpor!`, 'success');
+            };
+            reader.readAsText(file);
+        }
+
+        // ==========================================
+        // 9. MODUL PROJECT (LISTVIEW & ALERT NOTES)
+        // ==========================================
+        function renderProjectList() {
+            const tbody = document.getElementById('project-table-body');
+            const badge = document.getElementById('project-count-badge');
+            const monthFilter = document.getElementById('project-month-filter')?.value || '';
+            const resetMonthBtn = document.getElementById('reset-project-month-btn');
+            const q = (document.getElementById('project-search-input')?.value || '').toLowerCase().trim();
+
+            if (!tbody) return;
+            if (resetMonthBtn) resetMonthBtn.classList.toggle('hidden', !monthFilter);
+
+            const filtered = projectsData.filter(p => {
+                const matchMonth = !monthFilter || (p.dueDate && p.dueDate.startsWith(monthFilter));
+                const matchQuery = !q ||
+                    p.name.toLowerCase().includes(q) ||
+                    p.pic.toLowerCase().includes(q) ||
+                    p.status.toLowerCase().includes(q) ||
+                    (p.notes || '').toLowerCase().includes(q);
+                return matchMonth && matchQuery;
+            });
+
+            if (badge) badge.textContent = `${filtered.length} Project`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-10 text-center text-slate-400">Tidak ada data project pada filter ini.</td></tr>`;
+                return;
+            }
+
+            const statusBadgeMap = {
+                'Open': 'bg-slate-100 text-slate-700',
+                'On Progress': 'bg-amber-100 text-amber-800',
+                'Hold': 'bg-rose-100 text-rose-700',
+                'Done': 'bg-emerald-100 text-emerald-700'
+            };
+
+            tbody.innerHTML = filtered.map(p => {
+                const statusClass = statusBadgeMap[p.status] || 'bg-slate-100 text-slate-700';
+                const notesHtml = p.notes
+                    ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-200/80 text-amber-800 text-xs font-medium"><i data-lucide="alert-circle" class="w-3.5 h-3.5 text-amber-600 shrink-0"></i><span>${p.notes}</span></span>`
+                    : `<span class="text-xs text-slate-400">-</span>`;
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3.5 px-5 font-bold text-slate-900">${p.name}</td>
+                        <td class="py-3.5 px-5">
+                            <span class="px-2.5 py-1 rounded-lg bg-indigo-50 text-indigo-700 text-xs font-bold">${p.pic}</span>
+                        </td>
+                        <td class="py-3.5 px-5 font-mono text-xs font-semibold text-slate-600">${formatDateIndo(p.dueDate)}</td>
+                        <td class="py-3.5 px-5">
+                            <span class="px-2.5 py-1 rounded-full text-xs font-bold ${statusClass}">${p.status}</span>
+                        </td>
+                        <td class="py-3.5 px-5">${notesHtml}</td>
+                        <td class="py-3.5 px-5 text-right whitespace-nowrap">
+                            <button type="button" onclick="openProjectModal('${p.id}')" class="p-1.5 text-slate-500 hover:text-indigo-600 rounded-lg" title="Edit Project">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button type="button" onclick="deleteProject('${p.id}')" class="p-1.5 text-slate-500 hover:text-rose-600 rounded-lg" title="Hapus Project">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+            lucide.createIcons();
+        }
+
         function resetProjectMonthFilter() {
             const m = document.getElementById('project-month-filter');
             if (m) m.value = '';
@@ -6003,44 +6596,121 @@ function doPost(e) {
         // Kamera Pemindai Barcode
         let activeScannerTarget = '';
         let html5QrScannerInstance = null;
+        let nativeCameraStream = null;
+        let nativeBarcodeLoopId = null;
 
-        function openBarcodeCameraModal(target) {
+        function submitManualBarcodeModal() {
+            const val = (document.getElementById('manual-barcode-modal-input')?.value || '').trim();
+            if (!val) {
+                showToast('Masukkan kode barcode terlebih dahulu.', 'warning');
+                return;
+            }
+            onBarcodeScannedSuccess(val);
+        }
+
+        async function openBarcodeCameraModal(target) {
             activeScannerTarget = target;
             const modal = document.getElementById('barcode-camera-modal');
             const statusBox = document.getElementById('barcode-camera-status');
             const statusText = document.getElementById('barcode-camera-status-text');
+            const readerEl = document.getElementById('html5-qrcode-reader');
+            const videoWrap = document.getElementById('native-barcode-video-wrap');
+            const videoEl = document.getElementById('barcode-camera-video');
+            const manualInput = document.getElementById('manual-barcode-modal-input');
+
+            if (manualInput) manualInput.value = '';
             modal.classList.remove('hidden');
             modal.classList.add('flex');
             statusBox.classList.remove('hidden');
             statusText.textContent = 'Mengaktifkan kamera...';
-
-            if (typeof Html5Qrcode !== 'undefined') {
-                document.getElementById('barcode-camera-video').classList.add('hidden');
-                const readerEl = document.getElementById('html5-qrcode-reader');
-                readerEl.classList.remove('hidden');
-                statusBox.classList.add('hidden');
-                html5QrScannerInstance = new Html5Qrcode('html5-qrcode-reader');
-                html5QrScannerInstance.start(
-                    { facingMode: 'environment' },
-                    { fps: 10, qrbox: { width: 240, height: 120 } },
-                    (decodedText) => {
-                        onBarcodeScannedSuccess(decodedText);
-                    },
-                    () => {}
-                ).catch(() => {
-                    statusBox.classList.remove('hidden');
-                    statusText.textContent = 'Kamera tidak tersedia atau izin kamera ditolak browser. Silakan ketik kode barcode secara manual.';
-                });
-            } else {
-                statusText.textContent = 'Kamera tidak tersedia pada pratinjau ini. Silakan ketik kode barcode secara manual.';
-            }
+            readerEl.classList.add('hidden');
+            videoWrap.classList.add('hidden');
             lucide.createIcons();
+
+            // 1. Coba Html5Qrcode dengan dukungan format barcode produk (EAN-13, Code-128, QR, dll)
+            if (typeof Html5Qrcode !== 'undefined') {
+                try {
+                    readerEl.classList.remove('hidden');
+                    const formats = (typeof Html5QrcodeSupportedFormats !== 'undefined') ? [
+                        Html5QrcodeSupportedFormats.QR_CODE,
+                        Html5QrcodeSupportedFormats.EAN_13,
+                        Html5QrcodeSupportedFormats.EAN_8,
+                        Html5QrcodeSupportedFormats.CODE_128,
+                        Html5QrcodeSupportedFormats.CODE_39,
+                        Html5QrcodeSupportedFormats.UPC_A,
+                        Html5QrcodeSupportedFormats.UPC_E
+                    ] : undefined;
+
+                    html5QrScannerInstance = new Html5Qrcode('html5-qrcode-reader', formats ? { formatsToSupport: formats, verbose: false } : false);
+                    await html5QrScannerInstance.start(
+                        { facingMode: 'environment' },
+                        { fps: 12, qrbox: { width: 250, height: 130 }, aspectRatio: 1.5 },
+                        (decodedText) => {
+                            onBarcodeScannedSuccess(decodedText);
+                        },
+                        () => {}
+                    );
+                    statusBox.classList.add('hidden');
+                    return;
+                } catch (err) {
+                    readerEl.classList.add('hidden');
+                    html5QrScannerInstance = null;
+                }
+            }
+
+            // 2. Fallback ke getUserMedia + BarcodeDetector bawaan perangkat (HP Android / Chrome / Edge)
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                try {
+                    nativeCameraStream = await navigator.mediaDevices.getUserMedia({
+                        video: { facingMode: { ideal: 'environment' } },
+                        audio: false
+                    });
+                    videoEl.srcObject = nativeCameraStream;
+                    await videoEl.play();
+                    videoWrap.classList.remove('hidden');
+
+                    if ('BarcodeDetector' in window) {
+                        statusText.textContent = 'Arahkan kamera ke barcode produk...';
+                        const detector = new window.BarcodeDetector({
+                            formats: ['ean_13', 'ean_8', 'code_128', 'code_39', 'upc_a', 'upc_e', 'qr_code']
+                        });
+                        const scanFrame = async () => {
+                            if (!nativeCameraStream) return;
+                            try {
+                                const barcodes = await detector.detect(videoEl);
+                                if (barcodes && barcodes.length > 0 && barcodes[0].rawValue) {
+                                    onBarcodeScannedSuccess(barcodes[0].rawValue);
+                                    return;
+                                }
+                            } catch (e) {}
+                            nativeBarcodeLoopId = requestAnimationFrame(scanFrame);
+                        };
+                        nativeBarcodeLoopId = requestAnimationFrame(scanFrame);
+                    } else {
+                        statusText.textContent = 'Kamera aktif. Jika perangkat tidak mendukung auto-scan, ketik kode barcode pada kolom di bawah.';
+                    }
+                    return;
+                } catch (camErr) {
+                    videoWrap.classList.add('hidden');
+                }
+            }
+
+            statusBox.classList.remove('hidden');
+            statusText.textContent = 'Kamera tidak tersedia atau izin kamera ditolak browser. Silakan ketik kode barcode secara manual di bawah ini.';
         }
 
         function closeBarcodeCameraModal() {
             const modal = document.getElementById('barcode-camera-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+            if (nativeBarcodeLoopId) {
+                cancelAnimationFrame(nativeBarcodeLoopId);
+                nativeBarcodeLoopId = null;
+            }
+            if (nativeCameraStream) {
+                nativeCameraStream.getTracks().forEach(t => t.stop());
+                nativeCameraStream = null;
+            }
             if (html5QrScannerInstance) {
                 html5QrScannerInstance.stop().catch(() => {});
                 html5QrScannerInstance = null;
