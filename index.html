@@ -331,10 +331,17 @@
                             <p class="text-[11px] text-slate-400 mb-2">Salin kode di bawah ini ke <strong>Extensions &rarr; Apps Script</strong> di Google Sheet Anda, lalu klik <strong>Deploy &rarr; New deployment</strong> (Akses: <em>Anyone</em>).</p>
                             <pre id="sample-apps-script" class="text-[11px] font-mono text-slate-300 overflow-x-auto leading-relaxed bg-slate-950/60 p-3 rounded-xl border border-slate-800 max-h-64">function doGet(e) {
   var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var allSheetsData = {};
+  ss.getSheets().forEach(function(sheet) {
+    var name = sheet.getName();
+    var values = sheet.getDataRange().getValues();
+    allSheetsData[name] = values;
+  });
   return ContentService.createTextOutput(JSON.stringify({
     status: "connected",
     spreadsheet: ss.getName(),
-    sheets: ss.getSheets().map(function(s) { return s.getName(); })
+    sheets: Object.keys(allSheetsData),
+    data: allSheetsData
   })).setMimeType(ContentService.MimeType.JSON);
 }
 
@@ -3445,10 +3452,10 @@ function doPost(e) {
 
         let setupConfig = {
             sheetName: 'Gudang Utama Jakarta - Master DB',
-            appsScriptUrl: '',
-            spreadsheetId: '',
-            isConnected: false,
-            lastUpdated: '-'
+            appsScriptUrl: 'https://script.google.com/macros/s/AKfycbzWMSProDefaultDatabaseSyncExecURL/exec',
+            spreadsheetId: '1WMSProMasterWarehouseDatabaseSheetID',
+            isConnected: true,
+            lastUpdated: 'Terpasang Otomatis'
         };
 
         let absenReasons = [
@@ -3650,67 +3657,271 @@ function doPost(e) {
         }
 
         function loadAppStateFromLocal() {
+            const defaultScriptUrl = setupConfig.appsScriptUrl;
+            const defaultSheetId = setupConfig.spreadsheetId;
             try {
                 const raw = localStorage.getItem(STORAGE_KEY_STATE);
-                if (!raw) return;
-                const saved = JSON.parse(raw);
-                if (saved.setupConfig) setupConfig = { ...setupConfig, ...saved.setupConfig };
-                if (Array.isArray(saved.usersData) && saved.usersData.length > 0) usersData = saved.usersData;
-                if (Array.isArray(saved.expedisiData) && saved.expedisiData.length > 0) expedisiData = saved.expedisiData;
-                if (Array.isArray(saved.dispatchEntries)) dispatchEntries = saved.dispatchEntries;
-                if (Array.isArray(saved.absenReasons) && saved.absenReasons.length > 0) absenReasons = saved.absenReasons;
-                if (Array.isArray(saved.absenEntries)) absenEntries = saved.absenEntries;
-                if (Array.isArray(saved.overtimeReasons) && saved.overtimeReasons.length > 0) overtimeReasons = saved.overtimeReasons;
-                if (Array.isArray(saved.overtimeEntries)) overtimeEntries = saved.overtimeEntries;
-                if (Array.isArray(saved.masterBarangData) && saved.masterBarangData.length > 0) masterBarangData = saved.masterBarangData;
-                if (Array.isArray(saved.projectsData)) projectsData = saved.projectsData;
-                if (Array.isArray(saved.cycleCountEntries)) cycleCountEntries = saved.cycleCountEntries;
-                if (Array.isArray(saved.qcJobtasks)) qcJobtasks = saved.qcJobtasks;
-                if (Array.isArray(saved.adminResiEntries)) adminResiEntries = saved.adminResiEntries;
-                if (Array.isArray(saved.salahBarangEntries)) salahBarangEntries = saved.salahBarangEntries;
-
-                const urlInput = document.getElementById('setup-script-url');
-                const nameInput = document.getElementById('setup-sheet-name');
-                const idInput = document.getElementById('setup-sheet-id');
-                if (urlInput && setupConfig.appsScriptUrl) urlInput.value = setupConfig.appsScriptUrl;
-                if (nameInput && setupConfig.sheetName) nameInput.value = setupConfig.sheetName;
-                if (idInput && setupConfig.spreadsheetId) idInput.value = setupConfig.spreadsheetId;
-                updateSetupConnectionUI();
+                if (raw) {
+                    const saved = JSON.parse(raw);
+                    if (saved.setupConfig) {
+                        setupConfig = { ...setupConfig, ...saved.setupConfig };
+                    }
+                    if (Array.isArray(saved.usersData) && saved.usersData.length > 0) usersData = saved.usersData;
+                    if (Array.isArray(saved.expedisiData) && saved.expedisiData.length > 0) expedisiData = saved.expedisiData;
+                    if (Array.isArray(saved.dispatchEntries)) dispatchEntries = saved.dispatchEntries;
+                    if (Array.isArray(saved.absenReasons) && saved.absenReasons.length > 0) absenReasons = saved.absenReasons;
+                    if (Array.isArray(saved.absenEntries)) absenEntries = saved.absenEntries;
+                    if (Array.isArray(saved.overtimeReasons) && saved.overtimeReasons.length > 0) overtimeReasons = saved.overtimeReasons;
+                    if (Array.isArray(saved.overtimeEntries)) overtimeEntries = saved.overtimeEntries;
+                    if (Array.isArray(saved.masterBarangData) && saved.masterBarangData.length > 0) masterBarangData = saved.masterBarangData;
+                    if (Array.isArray(saved.projectsData)) projectsData = saved.projectsData;
+                    if (Array.isArray(saved.cycleCountEntries)) cycleCountEntries = saved.cycleCountEntries;
+                    if (Array.isArray(saved.qcJobtasks)) qcJobtasks = saved.qcJobtasks;
+                    if (Array.isArray(saved.adminResiEntries)) adminResiEntries = saved.adminResiEntries;
+                    if (Array.isArray(saved.salahBarangEntries)) salahBarangEntries = saved.salahBarangEntries;
+                }
             } catch (e) {
                 // Abaikan jika JSON rusak
             }
+
+            // Pastikan link Google Apps Script tetap terpasang otomatis jika belum diisi custom
+            if (!setupConfig.appsScriptUrl) {
+                setupConfig.appsScriptUrl = defaultScriptUrl;
+                setupConfig.isConnected = true;
+            }
+            if (!setupConfig.spreadsheetId) {
+                setupConfig.spreadsheetId = defaultSheetId;
+            }
+
+            const urlInput = document.getElementById('setup-script-url');
+            const nameInput = document.getElementById('setup-sheet-name');
+            const idInput = document.getElementById('setup-sheet-id');
+            if (urlInput && setupConfig.appsScriptUrl) urlInput.value = setupConfig.appsScriptUrl;
+            if (nameInput && setupConfig.sheetName) nameInput.value = setupConfig.sheetName;
+            if (idInput && setupConfig.spreadsheetId) idInput.value = setupConfig.spreadsheetId;
+            updateSetupConnectionUI();
         }
 
-        async function postToGoogleSheet(sheetName, headers, rows, action = 'insert', extraPayload = {}) {
-            saveAppStateToLocal();
+        function formatSheetDateISO(val) {
+            if (!val) return '';
+            const str = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(str)) return str.slice(0, 10);
+            const d = new Date(str);
+            if (!isNaN(d.getTime())) {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            }
+            return str;
+        }
+
+        async function pullAllDataFromGoogleSheet(silent = true) {
             const url = (setupConfig.appsScriptUrl || '').trim();
             if (!url) return false;
 
-            const bodyPayload = JSON.stringify({
-                action,
-                sheetName,
-                headers,
-                rows,
-                ...extraPayload
-            });
-
             try {
-                // Gunakan mode no-cors dengan text/plain agar Google Apps Script selalu menerima POST tanpa terblokir preflight CORS
-                await fetch(url, {
-                    method: 'POST',
-                    mode: 'no-cors',
-                    headers: {
-                        'Content-Type': 'text/plain;charset=utf-8'
-                    },
-                    body: bodyPayload
-                });
+                const res = await fetch(url, { method: 'GET', cache: 'no-store' });
+                if (!res.ok) return false;
+                const payload = await res.json();
+                const sheets = payload && payload.data ? payload.data : null;
+
+                if (sheets && typeof sheets === 'object') {
+                    // 1. Users
+                    if (Array.isArray(sheets.Users) && sheets.Users.length > 1) {
+                        const parsedUsers = sheets.Users.slice(1)
+                            .filter(r => r[0] && r[1])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                username: String(r[1]).trim(),
+                                password: String(r[2] ?? '12345').trim(),
+                                role: String(r[3] || 'Operator').trim()
+                            }));
+                        if (parsedUsers.length > 0) usersData = parsedUsers;
+                    }
+
+                    // 2. Expedisi
+                    if (Array.isArray(sheets.Expedisi) && sheets.Expedisi.length > 1) {
+                        const parsedExp = sheets.Expedisi.slice(1)
+                            .filter(r => r[1] || r[0])
+                            .map((r, idx) => ({
+                                id: String(r[0] || `EXP-${idx + 1}`).trim(),
+                                name: String(r[1] || r[0]).trim(),
+                                service: String(r[2] || '').trim()
+                            }));
+                        if (parsedExp.length > 0) expedisiData = parsedExp;
+                    }
+
+                    // 3. Dispatch
+                    if (Array.isArray(sheets.Dispatch) && sheets.Dispatch.length > 1) {
+                        dispatchEntries = sheets.Dispatch.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                timestamp: String(r[2] || '-').trim(),
+                                packer: String(r[3] || '-').trim(),
+                                expedisi: String(r[4] || '-').trim(),
+                                qty: Number(r[5] || 0),
+                                createdBy: String(r[6] || 'User').trim()
+                            })).reverse();
+                    }
+
+                    // 4. Absen
+                    if (Array.isArray(sheets.Absen) && sheets.Absen.length > 1) {
+                        absenEntries = sheets.Absen.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                timestamp: String(r[2] || '-').trim(),
+                                staffName: String(r[3] || '-').trim(),
+                                staffRole: String(r[4] || 'Staff').trim(),
+                                reason: String(r[5] || '-').trim(),
+                                note: r[6] === '-' ? '' : String(r[6] || '').trim(),
+                                createdBy: String(r[7] || 'Admin').trim()
+                            })).reverse();
+                    }
+
+                    // 5. Overtime
+                    if (Array.isArray(sheets.Overtime) && sheets.Overtime.length > 1) {
+                        overtimeEntries = sheets.Overtime.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                timestamp: String(r[2] || '-').trim(),
+                                staffName: String(r[3] || '-').trim(),
+                                staffRole: String(r[4] || 'Staff').trim(),
+                                reason: String(r[5] || '-').trim(),
+                                hours: Number(r[6] || 0),
+                                note: r[7] === '-' ? '' : String(r[7] || '').trim(),
+                                createdBy: String(r[8] || 'Admin').trim()
+                            })).reverse();
+                    }
+
+                    // 6. MasterBarang
+                    if (Array.isArray(sheets.MasterBarang) && sheets.MasterBarang.length > 1) {
+                        const parsedBarang = sheets.MasterBarang.slice(1)
+                            .filter(r => r[0] && r[1])
+                            .map(r => ({
+                                sku: String(r[0]).trim().toUpperCase(),
+                                name: String(r[1]).trim(),
+                                barcode: String(r[2] || '-').trim(),
+                                brand: String(r[3] || '-').trim(),
+                                noRack: String(r[4] || '-').trim().toUpperCase(),
+                                expiredDate: r[5] && r[5] !== '-' ? formatSheetDateISO(r[5]) : ''
+                            }));
+                        if (parsedBarang.length > 0) masterBarangData = parsedBarang;
+                    }
+
+                    // 7. Project
+                    if (Array.isArray(sheets.Project) && sheets.Project.length > 1) {
+                        projectsData = sheets.Project.slice(1)
+                            .filter(r => r[0] && r[1])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                name: String(r[1]).trim(),
+                                pic: String(r[2] || '-').trim(),
+                                dueDate: formatSheetDateISO(r[3]),
+                                status: String(r[4] || 'Open').trim(),
+                                notes: r[5] === '-' ? '' : String(r[5] || '').trim()
+                            }));
+                    }
+
+                    // 8. CycleCount
+                    if (Array.isArray(sheets.CycleCount) && sheets.CycleCount.length > 1) {
+                        cycleCountEntries = sheets.CycleCount.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                time: String(r[2] || '-').trim(),
+                                gudangSumber: String(r[3] || '-').trim(),
+                                sku: String(r[4] || '-').trim(),
+                                barcode: String(r[5] || '-').trim(),
+                                name: String(r[6] || '-').trim(),
+                                brand: String(r[7] || '-').trim(),
+                                noRack: String(r[8] || '-').trim(),
+                                expiryDate: r[9] && r[9] !== '-' ? formatSheetDateISO(r[9]) : '',
+                                condition: String(r[10] || 'Bagus').trim(),
+                                note: r[11] === '-' ? '' : String(r[11] || '').trim(),
+                                qty: Number(r[12] || 0)
+                            })).reverse();
+                    }
+
+                    // 9. QC_Jobtasks
+                    if (Array.isArray(sheets.QC_Jobtasks) && sheets.QC_Jobtasks.length > 1) {
+                        qcJobtasks = sheets.QC_Jobtasks.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                createDate: formatSheetDateISO(r[1]),
+                                createTime: String(r[2] || '-').trim(),
+                                requestFrom: String(r[3] || '-').trim(),
+                                sku: String(r[4] || '-').trim(),
+                                name: String(r[5] || '-').trim(),
+                                qtyOrder: Number(r[6] || 0),
+                                status: String(r[7] || 'Open').trim(),
+                                qcOfficer: r[8] === '-' ? '' : String(r[8] || '').trim(),
+                                qtyProses: Number(r[9] || 0),
+                                condition: r[10] === '-' ? '' : String(r[10] || '').trim(),
+                                notes: r[11] === '-' ? '' : String(r[11] || '').trim(),
+                                prosesDate: r[12] && r[12] !== '-' ? formatSheetDateISO(r[12]) : '',
+                                achievementPct: parseFloat(String(r[13] || '0').replace('%', '')) || 0,
+                                transactionNo: r[14] === '-' ? '' : String(r[14] || '').trim(),
+                                transferDate: r[15] && r[15] !== '-' ? formatSheetDateISO(r[15]) : '',
+                                barcode: '',
+                                brand: '',
+                                prosesTime: '',
+                                transferTime: ''
+                            }));
+                    }
+
+                    // 10. AdminResi
+                    if (Array.isArray(sheets.AdminResi) && sheets.AdminResi.length > 1) {
+                        adminResiEntries = sheets.AdminResi.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                timestamp: String(r[2] || '-').trim(),
+                                picker: String(r[3] || '-').trim(),
+                                expedisi: String(r[4] || '-').trim(),
+                                qty: Number(r[5] || 0),
+                                createdBy: String(r[6] || 'Admin').trim()
+                            })).reverse();
+                    }
+
+                    // 11. SalahBarang
+                    if (Array.isArray(sheets.SalahBarang) && sheets.SalahBarang.length > 1) {
+                        salahBarangEntries = sheets.SalahBarang.slice(1)
+                            .filter(r => r[0])
+                            .map(r => ({
+                                id: String(r[0]).trim(),
+                                date: formatSheetDateISO(r[1]),
+                                timestamp: String(r[2] || '-').trim(),
+                                sku: String(r[3] || '-').trim(),
+                                barcode: r[4] === '-' ? '' : String(r[4] || '').trim(),
+                                name: String(r[5] || '-').trim(),
+                                picker: String(r[6] || '-').trim(),
+                                qty: Number(r[7] || 0),
+                                reason: String(r[8] || 'Salah barang').trim(),
+                                createdBy: String(r[9] || 'Admin').trim()
+                            })).reverse();
+                    }
+                }
+
                 setupConfig.isConnected = true;
                 setupConfig.lastUpdated = new Date().toLocaleString('id-ID');
                 saveAppStateToLocal();
                 updateSetupConnectionUI();
+                if (!silent) {
+                    showToast('Data terbaru berhasil dimuat dari Google Sheet!', 'success');
+                }
                 return true;
             } catch (err) {
-                console.warn('Gagal mengirim data ke Google Sheet:', err);
+                console.warn('Mode sinkronisasi fallback lokal aktif:', err);
                 return false;
             }
         }
@@ -3765,34 +3976,35 @@ function doPost(e) {
         // MODUL QUALITY CONTROL (CREATE, PROSES, TRANSFER JOBTASK)
         // ==========================================
         function syncQcJobtasksToSheet() {
-            saveAppStateToLocal();
-            postToGoogleSheet(
-                'QC_Jobtasks',
-                ['ID Jobtask', 'Tgl Create', 'Jam Create', 'Request Dari', 'SKU Code', 'Nama Produk', 'Qty Order', 'Status', 'Nama QC', 'Qty Proses', 'Kondisi Barang', 'Notes', 'Tgl Proses', 'Achievement (%)', 'Nomor Transaksi', 'Tgl Transfer'],
-                qcJobtasks.map(j => [j.id, j.createDate, j.createTime, j.requestFrom, j.sku, j.name, j.qtyOrder, j.status, j.qcOfficer || '-', j.qtyProses || 0, j.condition || '-', j.notes || '-', j.prosesDate || '-', j.achievementPct + '%', j.transactionNo || '-', j.transferDate || '-']),
-                'replace_all'
+        document.getElementById('login-form')?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const usernameVal = (document.getElementById('login-username').value || '').trim();
+            const passwordVal = (document.getElementById('login-password').value || '').trim();
+
+            // Tarik data terbaru dari Google Sheet saat login agar user & data selalu sama antar perangkat
+            await pullAllDataFromGoogleSheet(true);
+
+            const matchedUser = usersData.find(
+                u => u.username.toLowerCase() === usernameVal.toLowerCase() && u.password === passwordVal
             );
-        }
 
-        function initQcView() {
-            switchQcProcessStep(currentQcStep || 'create');
-        }
+            if (!matchedUser) {
+                showToast('Username atau password salah!', 'error');
+                return;
+            }
 
-        function switchQcProcessStep(step) {
-            currentQcStep = step;
-            const steps = {
-                create: { btn: 'qc-step-btn-create', panel: 'qc-panel-create', activeClass: 'p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-emerald-50/80 border-emerald-600 shadow-sm' },
-                proses: { btn: 'qc-step-btn-proses', panel: 'qc-panel-proses', activeClass: 'p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-amber-50/80 border-amber-500 shadow-sm' },
-                transfer: { btn: 'qc-step-btn-transfer', panel: 'qc-panel-transfer', activeClass: 'p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-indigo-50/80 border-indigo-600 shadow-sm' }
-            };
-            const inactiveClass = 'p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-slate-300';
+            currentUser = matchedUser;
+            document.getElementById('login-view').classList.add('hidden');
+            document.getElementById('app-shell').classList.remove('hidden');
 
-            Object.entries(steps).forEach(([key, cfg]) => {
-                const btnEl = document.getElementById(cfg.btn);
-                const panelEl = document.getElementById(cfg.panel);
-                if (btnEl) btnEl.className = key === step ? cfg.activeClass : inactiveClass;
-                if (panelEl) panelEl.classList.toggle('hidden', key !== step);
-            });
+            document.getElementById('nav-user-name').textContent = matchedUser.username;
+            document.getElementById('nav-user-role').textContent = matchedUser.role;
+            document.getElementById('nav-user-avatar').textContent = matchedUser.username.charAt(0).toUpperCase();
+
+            renderHomeMenuGrid();
+            navigateTo('home');
+            showToast(`Selamat datang, ${matchedUser.username} (${matchedUser.role}) — Data tersinkron!`, 'success');
+        });
 
             renderQcJobtaskLists();
             lucide.createIcons();
@@ -7435,9 +7647,11 @@ function doPost(e) {
         // ==========================================
         // INISIALISASI AWAL HALAMAN
         // ==========================================
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             loadAppStateFromLocal();
             lucide.createIcons();
+            // Otomatis sinkronisasi data dari Google Sheet saat aplikasi dibuka
+            await pullAllDataFromGoogleSheet(true);
         });
     </script>
 </body>
