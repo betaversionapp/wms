@@ -798,9 +798,9 @@ function doPost(e) {
             </section>
 
             <!-- ========================================== -->
-            <!-- MODAL TAMBAH / EDIT PROJECT (SESUAI GAMBAR)-->
+            <!-- VIEW F2: LAPORAN ABSENSI STAFF             -->
             <!-- ========================================== -->
-            <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+            <section id="view-absen-report" class="hidden fade-in">
                 <div class="mb-5 max-w-md mx-auto">
                     <button onclick="navigateTo('absen')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
                         <i data-lucide="arrow-left" class="w-4 h-4"></i>
@@ -900,49 +900,1923 @@ function doPost(e) {
             </section>
 
             <!-- ========================================== -->
-    <!-- MODAL EDIT ENTRI DISPATCH                  -->
-    <!-- ========================================== -->
-    <div id="dispatch-edit-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
-            <div class="px-6 py-4 bg-sky-50 border-b border-sky-100 flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                    <i data-lucide="send" class="w-5 h-5 text-[#24699e]"></i>
-                    <h3 class="text-base font-bold text-slate-900">Edit Entri Resi Dispatch</h3>
+            <!-- VIEW G1: MODUL OVERTIME (LEMBUR STAFF)     -->
+            <!-- ========================================== -->
+            <section id="view-overtime" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-6 max-w-md mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali</span>
+                    </button>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="openOvertimeReasonManagerModal()" class="inline-flex items-center gap-1.5 px-3 py-2.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 rounded-xl text-xs font-bold shadow-xs transition">
+                            <i data-lucide="list-plus" class="w-4 h-4"></i>
+                            <span>Reason</span>
+                        </button>
+                        <button type="button" onclick="navigateTo('overtime-report')" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-[#24699e] hover:bg-[#1d5682] text-white rounded-xl text-xs font-bold shadow-sm transition">
+                            <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                            <span>View Laporan</span>
+                        </button>
+                    </div>
                 </div>
-                <button type="button" onclick="closeDispatchEditModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Form Input Overtime -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ENTRI OVERTIME STAFF</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700">Overtime</span>
+                        </div>
+
+                        <form id="overtime-entry-form" class="space-y-4">
+                            <!-- Tanggal (Otomatis default hari ini) -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="overtime-date" class="text-sm font-bold text-slate-800">Tanggal</label>
+                                    <span class="text-xs text-slate-400">default hari ini</span>
+                                </div>
+                                <input type="date" id="overtime-date" onchange="renderOvertimeList()" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                            </div>
+
+                            <!-- Nama Staff (Search dari nama user) -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="overtime-staff-search" class="text-sm font-bold text-slate-800">Nama Staff</label>
+                                    <span id="overtime-staff-role-badge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700"></span>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" id="overtime-staff-search" autocomplete="off" required
+                                        onfocus="showOvertimeStaffDropdown()" oninput="filterOvertimeStaffDropdown()"
+                                        placeholder="Cari nama staff dari data user..."
+                                        class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                                    <button type="button" id="clear-overtime-staff-btn" onclick="clearOvertimeStaffSelection()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="overtime-staff-selected">
+                                <!-- Dropdown hasil pencarian user -->
+                                <div id="overtime-staff-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100">
+                                    <!-- Item hasil pencarian staff -->
+                                </div>
+                            </div>
+
+                            <!-- Reason Lembur -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="overtime-reason" class="text-sm font-bold text-slate-800">Reason</label>
+                                    <button type="button" onclick="openOvertimeReasonManagerModal()" class="text-[11px] font-semibold text-amber-700 hover:underline">+ Tambah / Hapus Reason</button>
+                                </div>
+                                <select id="overtime-reason" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                                    <option value="">— Pilih Reason —</option>
+                                </select>
+                            </div>
+
+                            <!-- Tambahan Jam Lembur -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="overtime-hours" class="text-sm font-bold text-slate-800">Jumlah Jam</label>
+                                    <span class="text-xs text-slate-400">dalam jam (contoh: 2 atau 1.5)</span>
+                                </div>
+                                <div class="relative">
+                                    <input type="number" id="overtime-hours" min="0.5" max="24" step="0.5" placeholder="0" required
+                                        class="w-full px-4 py-3 pr-14 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition">
+                                    <span class="absolute inset-y-0 right-0 pr-4 flex items-center text-xs font-bold text-slate-400 pointer-events-none">Jam</span>
+                                </div>
+                            </div>
+
+                            <!-- Catatan -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="overtime-note" class="text-sm font-bold text-slate-800">Catatan</label>
+                                    <span class="text-xs text-slate-400">opsional</span>
+                                </div>
+                                <textarea id="overtime-note" rows="2" placeholder="Tulis keterangan atau detail pekerjaan lembur..."
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 transition resize-none"></textarea>
+                            </div>
+
+                            <!-- Tombol Simpan Overtime -->
+                            <div class="pt-1">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-amber-500 hover:bg-amber-600 active:bg-amber-700 text-white font-bold rounded-2xl shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="clock" class="w-4 h-4 stroke-[2.5]"></i>
+                                    <span>Simpan Overtime</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Daftar Riwayat Overtime Harian (Scroll Max 3 List) -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span id="overtime-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">RIWAYAT OVERTIME • -</span>
+                            <span id="overtime-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700">0 Data</span>
+                        </div>
+                        <div id="overtime-entries-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1">
+                            <!-- Item riwayat overtime di-render via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW G2: LAPORAN OVERTIME STAFF            -->
+            <!-- ========================================== -->
+            <section id="view-overtime-report" class="hidden fade-in">
+                <div class="mb-5 max-w-md mx-auto">
+                    <button onclick="navigateTo('overtime')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Input Overtime</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Filter Periode Laporan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5">PERIODE LAPORAN</div>
+
+                        <div class="flex flex-wrap gap-2 mb-3.5" id="overtime-report-period-buttons">
+                            <button type="button" data-period="today" onclick="setOvertimeReportPeriod('today')"
+                                class="overtime-report-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-period="this_week" onclick="setOvertimeReportPeriod('this_week')"
+                                class="overtime-report-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Ini
+                            </button>
+                            <button type="button" data-period="last_week" onclick="setOvertimeReportPeriod('last_week')"
+                                class="overtime-report-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Lalu
+                            </button>
+                            <button type="button" data-period="this_month" onclick="setOvertimeReportPeriod('this_month')"
+                                class="overtime-report-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Bulan Ini
+                            </button>
+                            <button type="button" data-period="custom" onclick="setOvertimeReportPeriod('custom')"
+                                class="overtime-report-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Custom
+                            </button>
+                        </div>
+
+                        <!-- Input Tanggal Custom -->
+                        <div id="overtime-report-custom-date-box" class="hidden grid-cols-2 gap-2 mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div>
+                                <label for="overtime-report-start-date" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                                <input type="date" id="overtime-report-start-date" onchange="renderOvertimeReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                            <div>
+                                <label for="overtime-report-end-date" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                                <input type="date" id="overtime-report-end-date" onchange="renderOvertimeReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="exportOvertimeReportExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition">
+                            <i data-lucide="download" class="w-4 h-4 text-[#24699e]"></i>
+                            <span>Ekspor Laporan Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Ringkasan Angka -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="overtime-report-total-jam" class="text-2xl font-extrabold text-amber-600 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">TOTAL JAM</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="overtime-report-total-staff" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">JUMLAH STAFF</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="overtime-report-top-reason" class="text-xs font-extrabold text-amber-700 leading-tight line-clamp-2 pt-1">-</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">REASON TERBANYAK</div>
+                        </div>
+                    </div>
+
+                    <!-- Rentang Tanggal Laporan -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RENTANG TANGGAL LAPORAN</span>
+                        <span id="overtime-report-date-range-badge" class="px-3.5 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#24699e] shadow-2xs">-</span>
+                    </div>
+
+                    <!-- Grafik Batang Berdasarkan Nama Paling Banyak (Total Jam) -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">PERINGKAT OVERTIME PER STAFF (JAM)</span>
+                            <span class="text-[11px] font-semibold text-slate-400">Terbanyak</span>
+                        </div>
+                        <div id="overtime-report-staff-bars" class="space-y-4">
+                            <!-- Grafik batang nama staff di-render via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan per Reason -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">REKAP BERDASARKAN REASON</div>
+                        <div id="overtime-report-reason-bars" class="space-y-4">
+                            <!-- Grafik batang reason di-render via JS -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW H: MODUL MASTER BARANG (DATABASE SKU) -->
+            <!-- ========================================== -->
+            <section id="view-master-barang" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+
+                    <!-- Tombol Aksi: Import by Template, Export by Excel, Add -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="file" id="import-barang-file" accept=".csv,.txt" class="hidden" onchange="handleImportBarangFile(event)">
+                        <button type="button" onclick="openImportBarangModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
+                            <i data-lucide="upload" class="w-4 h-4 text-purple-600"></i>
+                            <span>Import by Template</span>
+                        </button>
+                        <button type="button" onclick="exportMasterBarangExcel()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
+                            <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
+                            <span>Export by Excel</span>
+                        </button>
+                        <button type="button" onclick="openBarangModal()" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-purple-600/20 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add Barang</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kartu Daftar Master Barang -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="package" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-xl font-bold text-slate-900">Master Barang</h2>
+                                    <span id="barang-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-50 text-purple-700">0 SKU</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-500">Data produk diurutkan otomatis berdasarkan SKU Code (A – Z).</p>
+                            </div>
+                        </div>
+
+                        <!-- Search (SKU, Name, Scan Barcode) -->
+                        <div class="flex items-center gap-2 w-full md:w-96">
+                            <div class="relative flex-1">
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </div>
+                                <input type="text" id="barang-search-input" oninput="renderMasterBarangTable()"
+                                    placeholder="Cari SKU, Nama Barang, atau Scan Barcode..."
+                                    class="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                <button type="button" id="clear-barang-search-btn" onclick="clearBarangSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <button type="button" onclick="focusBarangBarcodeScanner()" class="p-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 rounded-xl transition shrink-0" title="Fokus Scan Barcode">
+                                <i data-lucide="scan-barcode" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Data Barang -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="py-3.5 px-5">
+                                        <div class="inline-flex items-center gap-1 text-purple-700">
+                                            <span>SKU Code</span>
+                                            <i data-lucide="arrow-down-a-z" class="w-3.5 h-3.5"></i>
+                                        </div>
+                                    </th>
+                                    <th class="py-3.5 px-5">Product Name</th>
+                                    <th class="py-3.5 px-5">Barcode</th>
+                                    <th class="py-3.5 px-5">Brand</th>
+                                    <th class="py-3.5 px-5">No Rack</th>
+                                    <th class="py-3.5 px-5">Expired Date</th>
+                                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="master-barang-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Baris barang di-render secara dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW I: MODUL PROJECT (MANAJEMEN PROYEK)   -->
+            <!-- ========================================== -->
+            <section id="view-project" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+
+                    <!-- Tombol Aksi: Export by Excel & Add Project -->
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="exportProjectExcel()" class="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
+                            <i data-lucide="download" class="w-4 h-4 text-emerald-600"></i>
+                            <span>Export by Excel</span>
+                        </button>
+                        <button type="button" onclick="openProjectModal()" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs sm:text-sm font-semibold shadow-md shadow-indigo-600/20 transition">
+                            <i data-lucide="plus" class="w-4 h-4"></i>
+                            <span>Add Project</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kartu Listview Project -->
+                <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+                    <div class="p-5 sm:p-6 border-b border-slate-100 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center shrink-0">
+                                <i data-lucide="folder-kanban" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-2">
+                                    <h2 class="text-xl font-bold text-slate-900">Manajemen Project Warehouse</h2>
+                                    <span id="project-count-badge" class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700">0 Project</span>
+                                </div>
+                                <p class="text-xs sm:text-sm text-slate-500">Pantau progres proyek, PIC, tenggat waktu (DueDate), dan catatan alert penting.</p>
+                            </div>
+                        </div>
+
+                        <!-- Filter Custom by Month & Search -->
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+                                <i data-lucide="calendar" class="w-4 h-4 text-indigo-600 shrink-0"></i>
+                                <label for="project-month-filter" class="text-xs font-bold text-slate-500 whitespace-nowrap">Filter Bulan:</label>
+                                <input type="month" id="project-month-filter" onchange="renderProjectList()"
+                                    class="bg-transparent text-xs sm:text-sm font-semibold text-slate-800 focus:outline-none">
+                                <button type="button" id="reset-project-month-btn" onclick="resetProjectMonthFilter()" class="hidden text-[11px] font-bold text-indigo-600 hover:underline pl-1">
+                                    Semua
+                                </button>
+                            </div>
+
+                            <div class="relative w-full sm:w-56">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                                    <i data-lucide="search" class="w-4 h-4"></i>
+                                </div>
+                                <input type="text" id="project-search-input" oninput="renderProjectList()"
+                                    placeholder="Cari project, PIC, status..."
+                                    class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Listbox / Listview Project -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50/80 border-b border-slate-200/80 text-xs font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="py-3.5 px-5">Nama Project</th>
+                                    <th class="py-3.5 px-5">PIC</th>
+                                    <th class="py-3.5 px-5">DueDate</th>
+                                    <th class="py-3.5 px-5">Status</th>
+                                    <th class="py-3.5 px-5">Notes</th>
+                                    <th class="py-3.5 px-5 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="project-table-body" class="divide-y divide-slate-100 text-sm">
+                                <!-- Baris project di-render secara dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW J: MODUL PRINT LABEL CUSTOM           -->
+            <!-- ========================================== -->
+            <section id="view-print-label" class="hidden fade-in">
+                <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+
+                    <div class="flex items-center gap-2.5">
+                        <button type="button" onclick="resetPrintLabelForm()" class="inline-flex items-center gap-1.5 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-xs sm:text-sm font-semibold shadow-sm transition">
+                            <i data-lucide="rotate-ccw" class="w-4 h-4 text-slate-500"></i>
+                            <span>Reset</span>
+                        </button>
+                        <button type="button" onclick="triggerPrintLabel()" class="inline-flex items-center gap-2 px-5 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-teal-600/20 transition">
+                            <i data-lucide="printer" class="w-4 h-4"></i>
+                            <span>Cetak Label</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 3 Pilihan Tab Jenis Print Label -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+                    <button type="button" id="label-mode-btn-so" onclick="switchPrintLabelMode('so')"
+                        class="p-4 rounded-2xl border-2 text-left transition flex items-center gap-3.5 bg-teal-50/70 border-teal-600 shadow-sm">
+                        <div class="w-10 h-10 rounded-xl bg-teal-600 text-white flex items-center justify-center shrink-0">
+                            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-900">1. Print Label Stock Opname</div>
+                            <div class="text-xs text-slate-500">Tom &amp; Jerry No. 105 • Ruang Qty Manual</div>
+                        </div>
+                    </button>
+
+                    <button type="button" id="label-mode-btn-carton" onclick="switchPrintLabelMode('carton')"
+                        class="p-4 rounded-2xl border-2 text-left transition flex items-center gap-3.5 bg-white border-slate-200 hover:border-teal-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="package" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-900">2. Print Label Carton</div>
+                            <div class="text-xs text-slate-500">Template Master Barang • Landscape</div>
+                        </div>
+                    </button>
+
+                    <button type="button" id="label-mode-btn-custom" onclick="switchPrintLabelMode('custom')"
+                        class="p-4 rounded-2xl border-2 text-left transition flex items-center gap-3.5 bg-white border-slate-200 hover:border-teal-300">
+                        <div class="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+                            <i data-lucide="type" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-bold text-slate-900">3. Print Label Custom</div>
+                            <div class="text-xs text-slate-500">Teks Manual Besar • Kertas Label A6</div>
+                        </div>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                    <!-- Panel Kiri: Form Pengaturan Sesuai Mode Label Terpilih -->
+                    <div class="lg:col-span-5 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+
+                        <!-- ========================================= -->
+                        <!-- FORM 1: PRINT LABEL STOCK OPNAME (TJ 105) -->
+                        <!-- ========================================= -->
+                        <div id="label-form-so" class="space-y-4">
+                            <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Label Cycle Count</h2>
+                                    <p class="text-xs text-slate-500">Kertas stiker Tom &amp; Jerry No. 105 (24 × 37 mm).</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="so-label-date" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tanggal</label>
+                                <input type="date" id="so-label-date" onchange="renderPrintLabelPreview()"
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+
+                            <div>
+                                <label for="so-label-team" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Tim</label>
+                                <input type="text" id="so-label-team" oninput="renderPrintLabelPreview()" placeholder="Contoh: Tim A / Ade & Denni"
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+
+                            <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-800 flex items-start gap-2">
+                                <i data-lucide="pen-tool" class="w-4 h-4 text-amber-600 shrink-0 mt-0.5"></i>
+                                <span>Bagian <strong>Qty :</strong> otomatis disediakan kotak luas kosong pada label agar mudah ditulis angka secara manual saat hitung fisik.</span>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3 pt-1">
+                                <div>
+                                    <label for="so-label-paper" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Kertas Label</label>
+                                    <select id="so-label-paper" onchange="renderPrintLabelPreview()"
+                                        class="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                        <option value="tj105_sheet">Tom &amp; Jerry No. 105 (1 Lembar = 30 Label)</option>
+                                        <option value="tj105_single">Tom &amp; Jerry No. 105 (Per Stiker 37×24 mm)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="so-label-copies" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Jumlah Label</label>
+                                    <input type="number" id="so-label-copies" value="30" min="1" max="150" oninput="renderPrintLabelPreview()"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================= -->
+                        <!-- FORM 2: PRINT LABEL CARTON (LANDSCAPE)    -->
+                        <!-- ========================================= -->
+                        <div id="label-form-carton" class="hidden space-y-4">
+                            <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="package" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Print Label Carton (Landscape)</h2>
+                                    <p class="text-xs text-slate-500">Data diambil dari Master Barang, Qty input manual.</p>
+                                </div>
+                            </div>
+
+                            <!-- Search SKU Code / Nama Product / Scan Barcode -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="label-product-search" class="text-xs font-bold text-slate-700 uppercase">Cari SKU / Nama Produk / Barcode</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="label-product-search" autocomplete="off"
+                                            onfocus="showLabelProductDropdown()" oninput="filterLabelProductDropdown()"
+                                            onkeydown="handleLabelSearchEnter(event)"
+                                            placeholder="Ketik SKU, Nama Produk, atau scan barcode..."
+                                            class="w-full pl-10 pr-9 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-teal-500 transition">
+                                        <button type="button" id="clear-label-search-btn" onclick="clearLabelProductSearch()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="focusLabelBarcodeSearch()" class="px-3.5 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs sm:text-sm font-bold shadow-xs transition inline-flex items-center gap-1.5 shrink-0" title="Scan Barcode Kamera">
+                                        <i data-lucide="camera" class="w-4 h-4"></i>
+                                        <span>Scan</span>
+                                    </button>
+                                </div>
+
+                                <div id="label-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- Detail Barang Terpilih (Otomatis dari Master Barang) -->
+                            <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-2 text-xs">
+                                <div class="flex items-center justify-between">
+                                    <span class="font-bold text-slate-500 uppercase">Data Master Barang</span>
+                                    <span id="label-selected-sku-badge" class="px-2 py-0.5 rounded bg-teal-100 text-teal-800 font-mono font-bold">Belum dipilih</span>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 pt-1">
+                                    <div class="col-span-2">
+                                        <span class="text-slate-400 block">Nama Produk:</span>
+                                        <span id="label-info-name" class="font-bold text-slate-800">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Barcode EAN-13:</span>
+                                        <span id="label-info-barcode" class="font-mono font-bold text-teal-700">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">Brand:</span>
+                                        <span id="label-info-brand" class="font-bold text-slate-800">-</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-slate-400 block">No. Rak:</span>
+                                        <span id="label-info-rack" class="font-mono font-bold text-indigo-700">-</span>
+                                    </div>
+                                    <div>
+                                        <label for="label-exp-input" class="text-slate-400 block mb-0.5">Exp Date <span class="text-teal-700 font-semibold">(Bisa Diedit)</span>:</label>
+                                        <input type="date" id="label-exp-input" onchange="renderPrintLabelPreview()"
+                                            class="w-full px-2 py-1 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="label-qty-input" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Qty pada Label</label>
+                                    <input type="number" id="label-qty-input" value="1" min="1" oninput="renderPrintLabelPreview()"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                                <div>
+                                    <label for="label-copies-input" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Jumlah Cetak (Copy)</label>
+                                    <input type="number" id="label-copies-input" value="1" min="1" max="100" oninput="renderPrintLabelPreview()"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="label-pic-input" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">PIC</label>
+                                <input type="text" id="label-pic-input" oninput="renderPrintLabelPreview()" placeholder="Nama PIC..."
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                            </div>
+
+                            <div class="pt-2 border-t border-slate-100 space-y-2.5">
+                                <label for="label-paper-preset" class="block text-xs font-bold text-slate-700 uppercase">Ukuran Kertas Carton (Landscape)</label>
+                                <select id="label-paper-preset" onchange="applyLabelPaperPreset()"
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    <option value="148x105">A6 Landscape (148 × 105 mm)</option>
+                                    <option value="100x70">100 × 70 mm (Label Carton Standar)</option>
+                                    <option value="100x50">100 × 50 mm (Thermal Landscape)</option>
+                                    <option value="custom">Custom Ukuran Landscape (mm)...</option>
+                                </select>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div>
+                                        <label for="label-width-mm" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Lebar (mm)</label>
+                                        <input type="number" id="label-width-mm" value="148" min="50" max="297" oninput="onCustomPaperSizeInput()"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                    <div>
+                                        <label for="label-height-mm" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tinggi (mm)</label>
+                                        <input type="number" id="label-height-mm" value="105" min="35" max="210" oninput="onCustomPaperSizeInput()"
+                                            class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ========================================= -->
+                        <!-- FORM 3: PRINT LABEL CUSTOM (KERTAS A6)    -->
+                        <!-- ========================================= -->
+                        <div id="label-form-custom" class="hidden space-y-4">
+                            <div class="flex items-center gap-3 pb-3 border-b border-slate-100">
+                                <div class="w-10 h-10 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center shrink-0">
+                                    <i data-lucide="type" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <h2 class="text-base font-bold text-slate-900">Print Label Custom (A6)</h2>
+                                    <p class="text-xs text-slate-500">Teks ditulis manual dengan ukuran huruf besar otomatis menyesuaikan kertas A6.</p>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label for="custom-label-text" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Teks Label Manual</label>
+                                <textarea id="custom-label-text" rows="4" oninput="renderPrintLabelPreview()"
+                                    placeholder="Ketik teks label di sini (misal: AREA KARANTINA / HOLD QC / RAK A-01)..."
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">AREA HOLDING QC</textarea>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="custom-label-orientation" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Orientasi Kertas A6</label>
+                                    <select id="custom-label-orientation" onchange="renderPrintLabelPreview()"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                        <option value="landscape">A6 Landscape (148 × 105 mm)</option>
+                                        <option value="portrait">A6 Portrait (105 × 148 mm)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="custom-label-copies" class="block text-xs font-bold text-slate-700 uppercase mb-1.5">Jumlah Cetak (Copy)</label>
+                                    <input type="number" id="custom-label-copies" value="1" min="1" max="100" oninput="renderPrintLabelPreview()"
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-500">
+                                </div>
+                            </div>
+
+                            <div class="flex items-center justify-between pt-1">
+                                <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
+                                    <input type="checkbox" id="custom-label-border" checked onchange="renderPrintLabelPreview()" class="rounded text-teal-600 focus:ring-teal-500">
+                                    <span>Tampilkan Bingkai Kotak Label</span>
+                                </label>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Panel Kanan: Live Preview Ukuran Sesuai Kertas -->
+                    <div class="lg:col-span-7 bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex flex-wrap items-center justify-between gap-2 pb-4 mb-5 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900">Live Preview Label Cetak</h3>
+                                <p class="text-xs text-slate-500">Tampilan pratinjau mengikuti ukuran dan orientasi kertas terpilih.</p>
+                            </div>
+                            <span id="label-dimension-badge" class="px-3 py-1 rounded-full text-xs font-mono font-bold bg-teal-50 text-teal-700 border border-teal-200">
+                                Tom &amp; Jerry No. 105 (37 × 24 mm)
+                            </span>
+                        </div>
+
+                        <!-- Area Kanvas Preview & Cetak -->
+                        <div class="bg-slate-100/90 border border-dashed border-slate-300 rounded-2xl p-6 min-h-[360px] flex items-center justify-center overflow-auto">
+                            <div id="print-label-sheet-area" class="flex flex-wrap gap-3 justify-center items-center">
+                                <!-- Kartu label di-render dinamis oleh JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW K: MODUL CYCLE COUNT (ENTRI FISIK)    -->
+            <!-- ========================================== -->
+            <section id="view-cycle-count" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-3 mb-6 max-w-2xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+
+                <div class="max-w-2xl mx-auto space-y-5">
+                    <!-- Kartu Input Cycle Count (Gaya Input QC) -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+                        <div class="flex items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <i data-lucide="clipboard-check" class="w-6 h-6 text-purple-600"></i>
+                                <h2 class="text-xl font-bold text-slate-900">Input Cycle Count</h2>
+                            </div>
+                            <button type="button" onclick="navigateTo('cycle-count-report')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold shadow-sm transition shrink-0">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                <span>View Laporan</span>
+                            </button>
+                        </div>
+
+                        <form id="cycle-count-form" class="space-y-4">
+                            <!-- Gudang Sumber (Combobox: DM, GR, GPACK, PM) -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="cc-gudang-sumber" class="text-xs font-bold text-slate-700">
+                                        Gudang Sumber <span class="text-rose-500">*</span>
+                                    </label>
+                                </div>
+                                <select id="cc-gudang-sumber" required
+                                    class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                    <option value="">— Pilih Gudang Sumber —</option>
+                                    <option value="DM">DM</option>
+                                    <option value="GR">GR</option>
+                                    <option value="GPACK">GPACK</option>
+                                    <option value="PM">PM</option>
+                                </select>
+                            </div>
+
+                            <!-- Scan / Cari Produk -->
+                            <div class="relative">
+                                <label for="cc-product-search" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Scan / Cari Produk <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="flex items-center gap-2.5">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="cc-product-search" autocomplete="off"
+                                            onfocus="showCycleCountDropdown()" oninput="filterCycleCountDropdown()"
+                                            onkeydown="handleCycleCountSearchEnter(event)"
+                                            placeholder="Scan barcode atau ketik SKU / nama produk..."
+                                            class="w-full pl-10 pr-9 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                        <button type="button" id="clear-cc-search-btn" onclick="resetCycleCountForm()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="focusCycleCountScanner()" class="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold shadow-xs transition inline-flex items-center gap-2 shrink-0">
+                                        <i data-lucide="camera" class="w-4 h-4"></i>
+                                        <span>Scan</span>
+                                    </button>
+                                </div>
+
+                                <!-- Dropdown Hasil Pencarian Master Barang -->
+                                <div id="cc-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- SKU Code & Nama Product (Otomatis Muncul & Terkunci) -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="cc-sku-code" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        SKU Code
+                                    </label>
+                                    <input type="text" id="cc-sku-code" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-bold text-purple-700 cursor-not-allowed focus:outline-none">
+                                </div>
+                                <div>
+                                    <label for="cc-product-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Nama Product
+                                    </label>
+                                    <input type="text" id="cc-product-name" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 cursor-not-allowed focus:outline-none">
+                                </div>
+                            </div>
+
+                            <!-- Info Detail Tambahan Produk (Barcode, Brand, No Rack) -->
+                            <div id="cc-product-info-card" class="hidden p-3.5 rounded-xl bg-purple-50/60 border border-purple-200/80 grid-cols-3 gap-3 text-xs">
+                                <div>
+                                    <span class="text-slate-400 block">Barcode</span>
+                                    <span id="cc-info-barcode" class="font-mono font-semibold text-slate-700">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block">Brand</span>
+                                    <span id="cc-info-brand" class="font-bold text-slate-800">-</span>
+                                </div>
+                                <div>
+                                    <span class="text-slate-400 block">Rak Master</span>
+                                    <span id="cc-info-rack" class="font-mono font-bold text-indigo-700">-</span>
+                                </div>
+                            </div>
+
+                            <!-- No Rack & Expiry Date -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="cc-no-rack" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        No Rack
+                                    </label>
+                                    <input type="text" id="cc-no-rack" placeholder="Contoh: R-A01"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-mono uppercase text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                </div>
+                                <div>
+                                    <label for="cc-expiry-date" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Expired Date
+                                    </label>
+                                    <input type="date" id="cc-expiry-date"
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                                </div>
+                            </div>
+
+                            <!-- Qty Fisik -->
+                            <div>
+                                <label for="cc-qty-fisik" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Qty Fisik <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="number" id="cc-qty-fisik" min="0" placeholder="0" required
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500 transition">
+                            </div>
+
+                            <!-- Kondisi Barang (Bagus / Rusak) -->
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1.5">
+                                    Kondisi Barang <span class="text-rose-500">*</span>
+                                </label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <button type="button" id="cc-cond-bagus-btn" onclick="setCycleCountCondition('Bagus')"
+                                        class="py-3 px-4 rounded-xl border-2 border-emerald-500 bg-emerald-50/70 text-emerald-700 font-bold text-sm flex items-center justify-center gap-2 transition">
+                                        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+                                        <span>Bagus</span>
+                                    </button>
+                                    <button type="button" id="cc-cond-rusak-btn" onclick="setCycleCountCondition('Rusak')"
+                                        class="py-3 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 font-semibold text-sm flex items-center justify-center gap-2 transition">
+                                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                        <span>Rusak</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Alasan Kerusakan (Muncul saat Kondisi = Rusak) -->
+                            <div id="cc-damage-reason-box" class="hidden">
+                                <label for="cc-damage-reason" class="block text-xs font-bold text-rose-700 mb-1.5">
+                                    Alasan Kerusakan <span class="text-rose-500">*</span>
+                                </label>
+                                <input type="text" id="cc-damage-reason" placeholder="Contoh: Kemasan penyok / segel terbuka / bocor..."
+                                    class="w-full px-3.5 py-2.5 bg-rose-50/40 border border-rose-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                            </div>
+
+                            <!-- Tombol Simpan Data Cycle Count -->
+                            <div class="pt-2">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-purple-600 hover:bg-purple-700 active:bg-purple-800 text-white font-bold rounded-xl shadow-md shadow-purple-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Simpan Data Cycle Count</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Riwayat Input Cycle Count Hari Ini -->
+                    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RIWAYAT CYCLE COUNT HARI INI</span>
+                            <span id="cc-today-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 text-purple-700">0 Data</span>
+                        </div>
+                        <div id="cc-today-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1">
+                            <!-- Diisi dinamis -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW L2: LAPORAN QUALITY CONTROL (QC)      -->
+            <!-- ========================================== -->
+            <section id="view-qc-report" class="hidden fade-in">
+                <div class="mb-5 max-w-6xl mx-auto">
+                    <button onclick="navigateTo('qc')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Modul QC</span>
+                    </button>
+                </div>
+
+                <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                    <!-- Header Laporan QC Dinamis per Tahap -->
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <div class="flex flex-wrap items-center gap-2 mb-2">
+                                <button type="button" id="qc-rep-tab-create" onclick="switchQcReportTab('create')"
+                                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-emerald-600 text-white shadow-xs">
+                                    1. Laporan Create Jobtask
+                                </button>
+                                <button type="button" id="qc-rep-tab-proses" onclick="switchQcReportTab('proses')"
+                                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                                    2. Laporan Proses Jobtask
+                                </button>
+                                <button type="button" id="qc-rep-tab-transfer" onclick="switchQcReportTab('transfer')"
+                                    class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition bg-slate-100 text-slate-600 hover:bg-slate-200">
+                                    3. Laporan Transfer Jobtask
+                                </button>
+                            </div>
+                            <h2 id="qc-report-main-title" class="text-xl font-bold text-slate-900">Laporan Create Jobtask QC</h2>
+                            <p id="qc-report-main-subtitle" class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekapitulasi permintaan pemeriksaan QC (Create Jobtask) beserta filter periode dan ekspor Excel.</p>
+                        </div>
+                        <button type="button" onclick="exportQcReportExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition self-start sm:self-auto">
+                            <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                            <span>Export Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Filter Tanggal, Kondisi/Status & Search -->
+                    <div class="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 space-y-3.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                            <div>
+                                <label for="qc-report-start-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">DARI TANGGAL</label>
+                                <input type="date" id="qc-report-start-date" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label for="qc-report-end-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">SAMPAI TANGGAL</label>
+                                <input type="date" id="qc-report-end-date" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                            </div>
+                            <div>
+                                <label for="qc-report-condition-filter" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">FILTER STATUS / KONDISI</label>
+                                <select id="qc-report-condition-filter" onchange="renderQcReport()"
+                                    class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                    <option value="all">Semua Data</option>
+                                    <option value="Bagus">Kondisi: Bagus</option>
+                                    <option value="Rusak">Kondisi: Rusak</option>
+                                    <option value="Open">Status: Open (Menunggu Proses)</option>
+                                    <option value="Ready Transfer">Status: Ready Transfer</option>
+                                    <option value="Done">Status: Done (Selesai Transfer)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="qc-report-search" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">CARI SKU / NAMA PRODUK / REQUEST / PETUGAS QC / NO. TRANSAKSI</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="qc-report-search" oninput="renderQcReport()"
+                                    placeholder="Ketik kata kunci pencarian..."
+                                    class="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                <button type="button" onclick="resetQcReportFilter()" class="p-2.5 bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 rounded-xl transition shrink-0" title="Reset Filter">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabel Laporan Dinamis sesuai Tab -->
+                    <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead id="qc-report-table-head">
+                                <!-- Diisi dinamis sesuai tab laporan -->
+                            </thead>
+                            <tbody id="qc-report-table-body" class="divide-y divide-slate-100 text-xs">
+                                <!-- Diisi dinamis -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Footer Summary QC -->
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-700">
+                        <span id="qc-report-summary-left">Total Data: 0</span>
+                        <div id="qc-report-summary-right" class="flex flex-wrap items-center gap-4">
+                            <!-- Ringkasan dinamis -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW K2: LAPORAN CYCLE COUNT               -->
+            <!-- ========================================== -->
+            <section id="view-cycle-count-report" class="hidden fade-in">
+                <div class="mb-5 max-w-6xl mx-auto">
+                    <button onclick="navigateTo('opname')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Input Cycle Count</span>
+                    </button>
+                </div>
+
+                <div class="max-w-6xl mx-auto bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 space-y-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+                        <div>
+                            <h2 class="text-xl font-bold text-slate-900">Laporan Cycle Count</h2>
+                            <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekapitulasi hasil hitung fisik stok gudang berdasarkan filter tanggal, gudang sumber, dan produk.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="exportCycleCountCsv()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-sm transition">
+                                <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                <span>Export Excel / CSV</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="p-4 rounded-2xl bg-slate-50/70 border border-slate-200/80 grid grid-cols-1 sm:grid-cols-4 gap-3">
+                        <div>
+                            <label for="cc-report-start-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Dari Tanggal</label>
+                            <input type="date" id="cc-report-start-date" onchange="renderCycleCountReport()"
+                                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label for="cc-report-end-date" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Sampai Tanggal</label>
+                            <input type="date" id="cc-report-end-date" onchange="renderCycleCountReport()"
+                                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                        </div>
+                        <div>
+                            <label for="cc-report-gudang-filter" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Gudang Sumber</label>
+                            <select id="cc-report-gudang-filter" onchange="renderCycleCountReport()"
+                                class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <option value="all">Semua Gudang</option>
+                                <option value="DM">DM</option>
+                                <option value="GR">GR</option>
+                                <option value="GPACK">GPACK</option>
+                                <option value="PM">PM</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="cc-report-search" class="block text-[11px] font-bold text-slate-600 uppercase mb-1">Cari SKU / Produk / Barcode</label>
+                            <div class="flex items-center gap-2">
+                                <input type="text" id="cc-report-search" oninput="renderCycleCountReport()" placeholder="Cari SKU, nama, barcode..."
+                                    class="flex-1 min-w-0 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500">
+                                <button type="button" onclick="resetCycleCountReportFilter()" class="p-2.5 bg-slate-200/80 hover:bg-slate-300/80 text-slate-700 rounded-xl transition shrink-0" title="Reset Filter">
+                                    <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto border border-slate-200/80 rounded-xl">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b border-slate-200/80 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    <th class="py-3 px-4">TANGGAL &amp; JAM</th>
+                                    <th class="py-3 px-4">GUDANG SUMBER</th>
+                                    <th class="py-3 px-4">SKU CODE</th>
+                                    <th class="py-3 px-4">BARCODE</th>
+                                    <th class="py-3 px-4">PRODUCT NAME</th>
+                                    <th class="py-3 px-4">BRAND</th>
+                                    <th class="py-3 px-4">NO RACK</th>
+                                    <th class="py-3 px-4">EXPIRY DATE</th>
+                                    <th class="py-3 px-4">KONDISI</th>
+                                    <th class="py-3 px-4">KETERANGAN</th>
+                                    <th class="py-3 px-4 text-right">QTY</th>
+                                    <th class="py-3 px-4 text-right">AKSI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="cc-report-table-body" class="divide-y divide-slate-100 text-xs"></tbody>
+                        </table>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2 text-xs sm:text-sm font-bold text-slate-700">
+                        <span id="cc-report-total-item">Total Item: 0</span>
+                        <div class="flex items-center gap-4">
+                            <span id="cc-report-total-bagus" class="text-emerald-700">Bagus: 0</span>
+                            <span id="cc-report-total-rusak" class="text-rose-600">Rusak: 0</span>
+                            <span id="cc-report-total-qty" class="text-purple-700">Total Qty: 0</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW L1: MODUL QUALITY CONTROL (QC)        -->
+            <!-- ========================================== -->
+            <section id="view-qc" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-3 mb-6 max-w-4xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+
+                <div class="max-w-4xl mx-auto space-y-5">
+                    <!-- 3 Pilihan Proses Utama QC -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <button type="button" id="qc-step-btn-create" onclick="switchQcProcessStep('create')"
+                            class="p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-emerald-50/80 border-emerald-600 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-600 text-white flex items-center justify-center shrink-0">
+                                    <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900">1. Create Jobtask</div>
+                                    <div class="text-[11px] text-slate-500">Buat antrean order QC</div>
+                                </div>
+                            </div>
+                            <span id="qc-badge-count-create" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-600 text-white">0</span>
+                        </button>
+
+                        <button type="button" id="qc-step-btn-proses" onclick="switchQcProcessStep('proses')"
+                            class="p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-amber-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                    <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900">2. Proses Jobtask</div>
+                                    <div class="text-[11px] text-slate-500">Pemeriksaan &amp; packaging</div>
+                                </div>
+                            </div>
+                            <span id="qc-badge-count-proses" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800">0</span>
+                        </button>
+
+                        <button type="button" id="qc-step-btn-transfer" onclick="switchQcProcessStep('transfer')"
+                            class="p-4 rounded-2xl border-2 text-left transition flex items-center justify-between gap-3 bg-white border-slate-200 hover:border-indigo-300">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center shrink-0">
+                                    <i data-lucide="arrow-right-left" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-bold text-slate-900">3. Transfer Jobtask</div>
+                                    <div class="text-[11px] text-slate-500">Achievement &amp; No. Transaksi</div>
+                                </div>
+                            </div>
+                            <span id="qc-badge-count-transfer" class="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-indigo-100 text-indigo-800">0</span>
+                        </button>
+                    </div>
+
+                    <!-- =================================================== -->
+                    <!-- SUB-MENU 1: CREATE JOBTASK                          -->
+                    <!-- =================================================== -->
+                    <div id="qc-panel-create" class="space-y-5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6 sm:p-7">
+                            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-5 border-b border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center">
+                                        <i data-lucide="file-plus-2" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-bold text-slate-900">Create Jobtask QC</h2>
+                                        <p class="text-xs text-slate-500">Buat daftar tugas QC baru yang akan otomatis masuk ke antrean Proses Jobtask.</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openQcReportForTab('create')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                    <span>View Laporan</span>
+                                </button>
+                            </div>
+
+                            <form id="qc-create-jobtask-form" class="space-y-4">
+                                <!-- Request dari (input manual) -->
+                                <div>
+                                    <label for="qc-create-request-from" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Request Dari <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="text" id="qc-create-request-from" required
+                                        placeholder="Masukkan asal request (misal: Tim Inbound / PO-2026-001 / Divisi Store)..."
+                                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                </div>
+
+                                <!-- Search kode sku / nama produk / barcode -->
+                                <div class="relative">
+                                    <label for="qc-product-search" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Search Kode SKU / Nama Produk / Barcode <span class="text-rose-500">*</span>
+                                    </label>
+                                    <div class="flex items-center gap-2.5">
+                                        <div class="relative flex-1">
+                                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                                <i data-lucide="search" class="w-4 h-4"></i>
+                                            </div>
+                                            <input type="text" id="qc-product-search" autocomplete="off"
+                                                onfocus="showQcProductDropdown()" oninput="filterQcProductDropdown()"
+                                                onkeydown="handleQcSearchEnter(event)"
+                                                placeholder="Scan barcode atau ketik kode SKU / nama produk..."
+                                                class="w-full pl-10 pr-9 py-3 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                                            <button type="button" id="clear-qc-search-btn" onclick="resetQcCreateForm()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                                <i data-lucide="x" class="w-4 h-4"></i>
+                                            </button>
+                                        </div>
+                                        <button type="button" onclick="focusQcScanner()" class="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-sm font-bold shadow-xs transition inline-flex items-center gap-2 shrink-0">
+                                            <i data-lucide="camera" class="w-4 h-4"></i>
+                                            <span>Scan</span>
+                                        </button>
+                                    </div>
+                                    <div id="qc-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl max-h-56 overflow-y-auto divide-y divide-slate-100"></div>
+                                </div>
+
+                                <!-- SKU Code (Otomatis) & Nama Produk (Otomatis) -->
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="qc-sku-code" class="block text-xs font-bold text-slate-700 mb-1.5">SKU Code <span class="text-slate-400 font-normal">(Otomatis)</span></label>
+                                        <input type="text" id="qc-sku-code" readonly value="-"
+                                            class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-mono font-bold text-emerald-700 cursor-not-allowed focus:outline-none">
+                                    </div>
+                                    <div>
+                                        <label for="qc-product-name" class="block text-xs font-bold text-slate-700 mb-1.5">Nama Produk <span class="text-slate-400 font-normal">(Otomatis)</span></label>
+                                        <input type="text" id="qc-product-name" readonly value="-"
+                                            class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-sm font-semibold text-slate-700 cursor-not-allowed focus:outline-none">
+                                    </div>
+                                </div>
+
+                                <!-- Qty Order -->
+                                <div>
+                                    <label for="qc-create-qty-order" class="block text-xs font-bold text-slate-700 mb-1.5">
+                                        Qty Order <span class="text-rose-500">*</span>
+                                    </label>
+                                    <input type="number" id="qc-create-qty-order" min="1" placeholder="Masukkan jumlah Qty Order..." required
+                                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                                </div>
+
+                                <div class="pt-2">
+                                    <button type="submit" class="w-full py-3.5 px-5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md shadow-emerald-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                        <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                                        <span>Simpan &amp; Kirim ke Proses Jobtask</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Daftar Jobtask yang Sudah Dibuat -->
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5">
+                            <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">DAFTAR CREATE JOBTASK TERBARU</span>
+                                <span id="qc-create-list-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700">0 Jobtask</span>
+                            </div>
+                            <div id="qc-create-list-container" class="divide-y divide-slate-100 max-h-[260px] overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- =================================================== -->
+                    <!-- SUB-MENU 2: PROSES JOBTASK                          -->
+                    <!-- =================================================== -->
+                    <div id="qc-panel-proses" class="hidden space-y-5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                                        <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-bold text-slate-900">Proses Jobtask QC</h2>
+                                        <p class="text-xs text-slate-500">Klik salah satu item dari Create Jobtask di bawah untuk memproses pemeriksaan QC.</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openQcReportForTab('proses')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                    <span>View Laporan</span>
+                                </button>
+                            </div>
+
+                            <div id="qc-proses-list-container" class="divide-y divide-slate-100">
+                                <!-- Item dari Create Jobtask yang siap diproses -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- =================================================== -->
+                    <!-- SUB-MENU 3: TRANSFER JOBTASK                        -->
+                    <!-- =================================================== -->
+                    <div id="qc-panel-transfer" class="hidden space-y-5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+                            <div class="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-slate-100">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                                        <i data-lucide="arrow-right-left" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-lg font-bold text-slate-900">Transfer Jobtask QC</h2>
+                                        <p class="text-xs text-slate-500">Klik item hasil Proses Jobtask untuk menginput Nomor Transaksi dan menyelesaikan status menjadi <strong>Done</strong>.</p>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="openQcReportForTab('transfer')" class="inline-flex items-center gap-1.5 px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                                    <i data-lucide="file-spreadsheet" class="w-4 h-4"></i>
+                                    <span>View Laporan</span>
+                                </button>
+                            </div>
+
+                            <div id="qc-transfer-list-container" class="divide-y divide-slate-100">
+                                <!-- Item hasil Proses Jobtask beserta % Achievement & Status Done -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW M: MODUL LAPORAN TERPADU              -->
+            <!-- ========================================== -->
+            <section id="view-laporan" class="hidden fade-in">
+                <div class="mb-6 max-w-4xl mx-auto">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                </div>
+                <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <button type="button" onclick="navigateTo('dispatch-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-amber-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Dispatch</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap resi harian, per kurir, dan per packer.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('cycle-count-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-purple-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-3">
+                            <i data-lucide="clipboard-check" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Cycle Count</div>
+                        <div class="text-xs text-slate-500 mt-1">Hasil hitung fisik stok per gudang sumber.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('qc-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-emerald-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                            <i data-lucide="shield-check" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Quality Control</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap Create, Proses, dan Transfer Jobtask QC.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('absen-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-teal-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-teal-100 text-teal-600 flex items-center justify-center mb-3">
+                            <i data-lucide="fingerprint" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Absensi</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap kehadiran, izin, sakit, dan telat staff.</div>
+                    </button>
+                    <button type="button" onclick="navigateTo('overtime-report')" class="bg-white p-5 rounded-2xl border border-slate-200 hover:border-amber-400 shadow-sm text-left transition group">
+                        <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                            <i data-lucide="clock" class="w-5 h-5"></i>
+                        </div>
+                        <div class="font-bold text-slate-900 group-hover:text-indigo-600">Laporan Overtime</div>
+                        <div class="text-xs text-slate-500 mt-1">Rekap total jam lembur staff per periode.</div>
+                    </button>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N: MODUL ADMIN & PLACEHOLDER          -->
+            <!-- ========================================== -->
+            <section id="view-admin" class="hidden fade-in">
+                <div class="mb-6 max-w-3xl mx-auto flex items-center justify-between">
+                    <button onclick="navigateTo('home')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Menu Utama</span>
+                    </button>
+                    <span class="px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold">Modul Administrasi</span>
+                </div>
+
+                <div class="max-w-3xl mx-auto space-y-5">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shrink-0 shadow-md shadow-indigo-600/20">
+                            <i data-lucide="file-text" class="w-6 h-6"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Administrasi Operasional Gudang</h2>
+                            <p class="text-xs sm:text-sm text-slate-500">Pilih sub-modul pencatatan resi picker atau pelaporan temuan salah barang.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <button type="button" onclick="navigateTo('admin-input-resi')" class="bg-white p-6 rounded-3xl border-2 border-slate-200/80 hover:border-indigo-500 shadow-sm hover:shadow-md text-left transition group relative overflow-hidden">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-100 text-indigo-600 group-hover:bg-indigo-600 group-hover:text-white flex items-center justify-center transition">
+                                    <i data-lucide="file-spreadsheet" class="w-6 h-6"></i>
+                                </div>
+                                <span id="admin-menu-resi-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700">0 Hari Ini</span>
+                            </div>
+                            <div class="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition">Input Resi Picker</div>
+                            <div class="text-xs text-slate-500 mt-1 leading-relaxed">Catat jumlah resi berdasarkan nama picker dan ekspedisi pengiriman.</div>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-indigo-600">
+                                <span>Buka Form Entri</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </button>
+
+                        <button type="button" onclick="navigateTo('admin-salah-barang')" class="bg-white p-6 rounded-3xl border-2 border-slate-200/80 hover:border-rose-500 shadow-sm hover:shadow-md text-left transition group relative overflow-hidden">
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 group-hover:bg-rose-600 group-hover:text-white flex items-center justify-center transition">
+                                    <i data-lucide="alert-octagon" class="w-6 h-6"></i>
+                                </div>
+                                <span id="admin-menu-sb-badge" class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700">0 Hari Ini</span>
+                            </div>
+                            <div class="text-base font-bold text-slate-900 group-hover:text-rose-600 transition">Catat Salah Barang</div>
+                            <div class="text-xs text-slate-500 mt-1 leading-relaxed">Pencatatan dan audit temuan kesalahan pengambilan barang (picking) oleh picker.</div>
+                            <div class="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-rose-600">
+                                <span>Buka Form Temuan</span>
+                                <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                            </div>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N1: ADMIN - INPUT RESI PICKER         -->
+            <!-- ========================================== -->
+            <section id="view-admin-input-resi" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-2 mb-6 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali</span>
+                    </button>
+                    <button type="button" onclick="navigateTo('admin-input-resi-report')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                        <span>View Laporan</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ADMIN • INPUT RESI PICKER</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700">Picker Log</span>
+                        </div>
+
+                        <form id="admin-resi-form" class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-date" class="text-sm font-bold text-slate-800">Tanggal</label>
+                                    <span class="text-xs text-slate-400">default hari ini</span>
+                                </div>
+                                <input type="date" id="admin-resi-date" onchange="renderAdminResiStatsAndList()" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                            </div>
+
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-picker-search" class="text-sm font-bold text-slate-800">Nama Picker</label>
+                                    <span id="admin-resi-picker-role-badge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700"></span>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" id="admin-resi-picker-search" autocomplete="off" required
+                                        onfocus="showAdminResiPickerDropdown()" oninput="filterAdminResiPickerDropdown()"
+                                        placeholder="Ketik untuk mencari nama picker..."
+                                        class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                                    <button type="button" id="clear-admin-resi-picker-btn" onclick="clearAdminResiPickerSelection()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="admin-resi-picker">
+                                <div id="admin-resi-picker-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-expedisi" class="text-sm font-bold text-slate-800">Nama Expedisi</label>
+                                </div>
+                                <select id="admin-resi-expedisi" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                                    <option value="">— Pilih Expedisi —</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="admin-resi-qty" class="text-sm font-bold text-slate-800">Jumlah Resi</label>
+                                </div>
+                                <input type="number" id="admin-resi-qty" min="1" placeholder="0" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-600 transition">
+                            </div>
+
+                            <div class="pt-1">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-indigo-600 hover:bg-indigo-700 active:bg-indigo-800 text-white font-bold rounded-2xl shadow-md shadow-indigo-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="plus" class="w-4 h-4 stroke-[2.5]"></i>
+                                    <span>Simpan Input Resi</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Kartu Ringkasan Harian -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-total-qty" class="text-2xl font-extrabold text-indigo-600 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">TOTAL RESI</div>
+                            <div id="admin-resi-stat-date-1" class="text-[10px] text-slate-400">-</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-total-entri" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">JUMLAH ENTRI</div>
+                            <div id="admin-resi-stat-date-2" class="text-[10px] text-slate-400">• -</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-avg-qty" class="text-2xl font-extrabold text-amber-600 leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1">RATA-RATA</div>
+                            <div id="admin-resi-stat-date-3" class="text-[10px] text-slate-400">-</div>
+                        </div>
+                    </div>
+
+                    <!-- Daftar Riwayat Harian -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span id="admin-resi-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">ENTRI RESI • -</span>
+                            <span id="admin-resi-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-indigo-50 text-indigo-700">0 Data</span>
+                        </div>
+                        <div id="admin-resi-entries-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N2: LAPORAN ADMIN INPUT RESI          -->
+            <!-- ========================================== -->
+            <section id="view-admin-input-resi-report" class="hidden fade-in">
+                <div class="mb-5 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin-input-resi')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Input Resi</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Periode Laporan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5">PERIODE LAPORAN</div>
+
+                        <div class="flex flex-wrap gap-2 mb-3.5" id="admin-resi-report-period-buttons">
+                            <button type="button" data-period="today" onclick="setAdminResiReportPeriod('today')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-period="this_week" onclick="setAdminResiReportPeriod('this_week')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Ini
+                            </button>
+                            <button type="button" data-period="last_week" onclick="setAdminResiReportPeriod('last_week')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Lalu
+                            </button>
+                            <button type="button" data-period="this_month" onclick="setAdminResiReportPeriod('this_month')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Bulan Ini
+                            </button>
+                            <button type="button" data-period="custom" onclick="setAdminResiReportPeriod('custom')"
+                                class="admin-resi-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Custom
+                            </button>
+                        </div>
+
+                        <div id="admin-resi-custom-date-box" class="hidden grid-cols-2 gap-2 mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div>
+                                <label for="admin-resi-rep-start" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                                <input type="date" id="admin-resi-rep-start" onchange="renderAdminResiReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                            <div>
+                                <label for="admin-resi-rep-end" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                                <input type="date" id="admin-resi-rep-end" onchange="renderAdminResiReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="exportAdminResiExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition">
+                            <i data-lucide="download" class="w-4 h-4 text-[#24699e]"></i>
+                            <span>Ekspor Laporan Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Ringkasan Angka -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-total" class="text-2xl font-extrabold text-[#24699e] leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">TOTAL RESI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-count" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">JUMLAH ENTRI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="admin-resi-rep-avg" class="text-2xl font-extrabold text-[#c85a17] leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">RATA-RATA/ENTRI</div>
+                        </div>
+                    </div>
+
+                    <!-- Rentang Tanggal Laporan -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RENTANG TANGGAL LAPORAN</span>
+                        <span id="admin-resi-rep-date-range-badge" class="px-3.5 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#24699e] shadow-2xs">-</span>
+                    </div>
+
+                    <!-- Resi per Expedisi -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">RESI PER EXPEDISI</div>
+                        <div id="admin-resi-rep-expedisi-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Resi per Picker -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">RESI PER PICKER</div>
+                        <div id="admin-resi-rep-picker-bars" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N3: ADMIN - CATAT SALAH BARANG        -->
+            <!-- ========================================== -->
+            <section id="view-admin-salah-barang" class="hidden fade-in">
+                <div class="flex items-center justify-between gap-2 mb-6 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali</span>
+                    </button>
+                    <button type="button" onclick="navigateTo('admin-salah-barang-report')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4"></i>
+                        <span>View Laporan</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">ADMIN • CATAT SALAH BARANG</span>
+                            <span class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-rose-50 text-rose-700">Audit Picking</span>
+                        </div>
+
+                        <form id="admin-salah-barang-form" class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-date" class="text-sm font-bold text-slate-800">Tanggal</label>
+                                    <span class="text-xs text-slate-400">default hari ini</span>
+                                </div>
+                                <input type="date" id="sb-date" onchange="renderSalahBarangDailyList()" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                            </div>
+
+                            <!-- Scan / Cari Produk dari Master Barang -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-product-search" class="text-sm font-bold text-slate-800">Scan / Cari Produk</label>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <div class="relative flex-1">
+                                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                            <i data-lucide="search" class="w-4 h-4"></i>
+                                        </div>
+                                        <input type="text" id="sb-product-search" autocomplete="off"
+                                            onfocus="showSalahBarangProductDropdown()" oninput="filterSalahBarangProductDropdown()"
+                                            onkeydown="handleSalahBarangSearchEnter(event)"
+                                            placeholder="Scan barcode atau ketik SKU / nama..."
+                                            class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                        <button type="button" id="clear-sb-search-btn" onclick="resetSalahBarangProductSelection()" class="hidden absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                                            <i data-lucide="x" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <button type="button" onclick="openBarcodeCameraModal('admin_salah_barang')" class="px-3.5 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold shadow-xs transition inline-flex items-center gap-1.5 shrink-0" title="Scan Kamera">
+                                        <i data-lucide="camera" class="w-4 h-4"></i>
+                                        <span>Scan</span>
+                                    </button>
+                                </div>
+                                <div id="sb-product-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-52 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <!-- SKU & Nama Barang Otomatis -->
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label for="sb-sku-code" class="block text-xs font-bold text-slate-600 mb-1">SKU Code</label>
+                                    <input type="text" id="sb-sku-code" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-mono font-bold text-rose-700 cursor-not-allowed">
+                                </div>
+                                <div>
+                                    <label for="sb-product-name" class="block text-xs font-bold text-slate-600 mb-1">Nama Barang</label>
+                                    <input type="text" id="sb-product-name" readonly value="-"
+                                        class="w-full px-3.5 py-2.5 bg-slate-100 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 cursor-not-allowed">
+                                </div>
+                            </div>
+
+                            <!-- Nama Picker (Bisa diketik cari) -->
+                            <div class="relative">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-picker-search" class="text-sm font-bold text-slate-800">Nama Picker</label>
+                                    <span id="sb-picker-role-badge" class="hidden text-[11px] font-semibold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700"></span>
+                                </div>
+                                <div class="relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                                        <i data-lucide="search" class="w-4 h-4"></i>
+                                    </div>
+                                    <input type="text" id="sb-picker-search" autocomplete="off" required
+                                        onfocus="showSalahBarangPickerDropdown()" oninput="filterSalahBarangPickerDropdown()"
+                                        placeholder="Ketik untuk mencari nama picker..."
+                                        class="w-full pl-10 pr-9 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                    <button type="button" id="clear-sb-picker-btn" onclick="clearSalahBarangPickerSelection()" class="hidden absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600">
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input type="hidden" id="sb-picker">
+                                <div id="sb-picker-dropdown" class="hidden absolute z-30 left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-2xl shadow-xl max-h-48 overflow-y-auto divide-y divide-slate-100"></div>
+                            </div>
+
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-qty" class="text-sm font-bold text-slate-800">Qty</label>
+                                </div>
+                                <input type="number" id="sb-qty" min="1" placeholder="0" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-semibold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                            </div>
+
+                            <!-- Pilihan Alasan setelah isi Qty -->
+                            <div>
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <label for="sb-reason" class="text-sm font-bold text-slate-800">Alasan</label>
+                                </div>
+                                <select id="sb-reason" required
+                                    class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-rose-500 transition">
+                                    <option value="">— Pilih Alasan —</option>
+                                    <option value="Barang kurang">Barang kurang</option>
+                                    <option value="Barang lebih">Barang lebih</option>
+                                    <option value="Barang rusak">Barang rusak</option>
+                                    <option value="Salah barang">Salah barang</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-1">
+                                <button type="submit" class="w-full py-3.5 px-5 bg-rose-600 hover:bg-rose-700 active:bg-rose-800 text-white font-bold rounded-2xl shadow-md shadow-rose-600/20 transition flex items-center justify-center gap-2 text-sm">
+                                    <i data-lucide="alert-circle" class="w-4 h-4 stroke-[2.5]"></i>
+                                    <span>Simpan Catatan Salah Barang</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Riwayat Harian Salah Barang -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="flex items-center justify-between pb-3 mb-2 border-b border-slate-100">
+                            <span id="sb-list-header" class="text-xs font-bold text-slate-400 uppercase tracking-wider">RIWAYAT SALAH BARANG • -</span>
+                            <span id="sb-count-badge" class="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700">0 Data</span>
+                        </div>
+                        <div id="sb-daily-list" class="divide-y divide-slate-100 max-h-[240px] overflow-y-auto pr-1"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ========================================== -->
+            <!-- VIEW N4: LAPORAN ADMIN SALAH BARANG        -->
+            <!-- ========================================== -->
+            <section id="view-admin-salah-barang-report" class="hidden fade-in">
+                <div class="mb-5 max-w-md mx-auto">
+                    <button onclick="navigateTo('admin-salah-barang')" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl text-sm font-medium shadow-sm transition">
+                        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                        <span>Kembali ke Catat Salah Barang</span>
+                    </button>
+                </div>
+
+                <div class="max-w-md mx-auto space-y-4">
+                    <!-- Kartu Periode Laporan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3.5">PERIODE LAPORAN</div>
+
+                        <div class="flex flex-wrap gap-2 mb-3.5" id="sb-report-period-buttons">
+                            <button type="button" data-period="today" onclick="setSalahBarangReportPeriod('today')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-[#24699e] text-white shadow-xs">
+                                Hari Ini
+                            </button>
+                            <button type="button" data-period="this_week" onclick="setSalahBarangReportPeriod('this_week')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Ini
+                            </button>
+                            <button type="button" data-period="last_week" onclick="setSalahBarangReportPeriod('last_week')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Minggu Lalu
+                            </button>
+                            <button type="button" data-period="this_month" onclick="setSalahBarangReportPeriod('this_month')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Bulan Ini
+                            </button>
+                            <button type="button" data-period="custom" onclick="setSalahBarangReportPeriod('custom')"
+                                class="sb-period-btn px-4 py-2 rounded-full text-xs font-bold transition bg-white border border-slate-200 text-slate-700 hover:bg-slate-50">
+                                Custom
+                            </button>
+                        </div>
+
+                        <div id="sb-custom-date-box" class="hidden grid-cols-2 gap-2 mb-3.5 p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+                            <div>
+                                <label for="sb-rep-start" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Dari Tanggal</label>
+                                <input type="date" id="sb-rep-start" onchange="renderSalahBarangReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                            <div>
+                                <label for="sb-rep-end" class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Sampai Tanggal</label>
+                                <input type="date" id="sb-rep-end" onchange="renderSalahBarangReport()"
+                                    class="w-full px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                            </div>
+                        </div>
+
+                        <button type="button" onclick="exportSalahBarangExcel()" class="inline-flex items-center gap-2 px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-2xl text-xs font-bold text-slate-700 shadow-2xs transition">
+                            <i data-lucide="download" class="w-4 h-4 text-[#24699e]"></i>
+                            <span>Ekspor Laporan Excel</span>
+                        </button>
+                    </div>
+
+                    <!-- Kartu Ringkasan Angka -->
+                    <div class="grid grid-cols-3 gap-2.5">
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-total-qty" class="text-2xl font-extrabold text-[#24699e] leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">TOTAL QTY SALAH</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-total-case" class="text-2xl font-extrabold text-slate-900 leading-tight">0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">JUMLAH ENTRI</div>
+                        </div>
+                        <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-3.5">
+                            <div id="sb-rep-avg-qty" class="text-2xl font-extrabold text-[#c85a17] leading-tight">0,0</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase mt-1.5">RATA-RATA/ENTRI</div>
+                        </div>
+                    </div>
+
+                    <!-- Rentang Tanggal Laporan -->
+                    <div class="flex items-center justify-between px-1">
+                        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">RENTANG TANGGAL LAPORAN</span>
+                        <span id="sb-rep-date-range-badge" class="px-3.5 py-1 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-[#24699e] shadow-2xs">-</span>
+                    </div>
+
+                    <!-- Salah Barang per Produk / SKU -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">SALAH BARANG PER PRODUK</div>
+                        <div id="sb-rep-product-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Salah Barang per Picker -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">SALAH BARANG PER PICKER</div>
+                        <div id="sb-rep-picker-bars" class="space-y-4"></div>
+                    </div>
+
+                    <!-- Rekap per Alasan -->
+                    <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-5">
+                        <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-4">REKAP PER ALASAN</div>
+                        <div id="sb-rep-reason-bars" class="space-y-4"></div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="view-module-placeholder" class="hidden fade-in">
+                <div class="max-w-md mx-auto bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8 text-center">
+                    <div id="placeholder-icon-box" class="w-16 h-16 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mx-auto mb-4">
+                        <i data-lucide="layers" class="w-8 h-8"></i>
+                    </div>
+                    <h2 id="placeholder-title" class="text-xl font-bold text-slate-900">Modul</h2>
+                    <p id="placeholder-desc" class="text-sm text-slate-500 mt-2">Deskripsi modul operasional gudang.</p>
+                    <button onclick="navigateTo('home')" class="mt-6 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-sm font-semibold transition">
+                        Kembali ke Menu Utama
+                    </button>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MODAL TAMBAH / EDIT PROJECT (SESUAI GAMBAR)-->
+    <!-- ========================================== -->
+    <div id="project-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden fade-in">
+            <div class="px-6 py-4 bg-indigo-50/80 border-b border-indigo-100 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i data-lucide="folder-kanban" class="w-5 h-5 text-indigo-600"></i>
+                    <h3 id="project-modal-title" class="text-base font-bold text-slate-900">Tambah Project Baru</h3>
+                </div>
+                <button type="button" onclick="closeProjectModal()" class="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
-            <form id="dispatch-edit-form" class="p-6 space-y-4">
-                <input type="hidden" id="edit-dispatch-id">
+
+            <form id="project-form" class="p-6 space-y-4">
+                <input type="hidden" id="edit-project-id">
+
                 <div>
-                    <label for="edit-dispatch-date" class="block text-xs font-bold text-slate-700 mb-1.5">Tanggal</label>
-                    <input type="date" id="edit-dispatch-date" required
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                    <label for="form-project-name" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        Nama Project <span class="text-rose-500">*</span>
+                    </label>
+                    <input type="text" id="form-project-name" required placeholder="Contoh: Relokasi Rak Area B"
+                        class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                 </div>
+
                 <div>
-                    <label for="edit-dispatch-packer" class="block text-xs font-bold text-slate-700 mb-1.5">Packer</label>
-                    <select id="edit-dispatch-packer" required
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                    <label for="form-project-pic" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        PIC (Diambil dari Data User) <span class="text-rose-500">*</span>
+                    </label>
+                    <select id="form-project-pic" required
+                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     </select>
                 </div>
-                <div>
-                    <label for="edit-dispatch-expedisi" class="block text-xs font-bold text-slate-700 mb-1.5">Expedisi</label>
-                    <select id="edit-dispatch-expedisi" required
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
-                    </select>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="form-project-duedate" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            DueDate <span class="text-rose-500">*</span>
+                        </label>
+                        <input type="date" id="form-project-duedate" required
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    </div>
+                    <div>
+                        <label for="form-project-status" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Status <span class="text-rose-500">*</span>
+                        </label>
+                        <select id="form-project-status" required
+                            class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <option value="Open">Open</option>
+                            <option value="On Progress">On Progress</option>
+                            <option value="Hold">Hold</option>
+                            <option value="Done">Done</option>
+                        </select>
+                    </div>
                 </div>
+
                 <div>
-                    <label for="edit-dispatch-qty" class="block text-xs font-bold text-slate-700 mb-1.5">Jumlah Resi</label>
-                    <input type="number" id="edit-dispatch-qty" min="1" required
-                        class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#24699e]">
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="form-project-notes" class="text-xs font-bold text-slate-700">Notes (Alert Penting)</label>
+                        <span class="text-[11px] font-semibold text-amber-600">Opsional • Muncul sebagai badge alert</span>
+                    </div>
+                    <textarea id="form-project-notes" rows="3" placeholder="Tulis catatan alert atau instruksi khusus project..."
+                        class="w-full px-3.5 py-2.5 bg-amber-50/40 border border-amber-200 rounded-xl text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-amber-500 resize-none"></textarea>
                 </div>
-                <div class="pt-2 flex items-center justify-end gap-2.5 border-t border-slate-100">
-                    <button type="button" onclick="closeDispatchEditModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+
+                <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                    <button type="button" onclick="closeProjectModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
                         Batal
                     </button>
-                    <button type="submit" class="px-5 py-2.5 bg-[#24699e] hover:bg-[#1d5682] text-white rounded-xl text-xs font-bold shadow-sm transition">
-                        Simpan Perubahan
+                    <button type="submit" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl text-xs font-bold shadow-sm transition">
+                        Simpan Project
                     </button>
                 </div>
             </form>
@@ -3989,12 +5863,9 @@ function doPost(e) {
                         <div class="text-xs font-extrabold text-slate-800">${i.packer.toUpperCase()} • ${i.expedisi.toUpperCase()}</div>
                         <div class="text-[11px] text-slate-400 mt-0.5">${formatDateIndo(i.date)} ${i.timestamp} • oleh ${i.createdBy}</div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                        <span class="text-base font-extrabold text-[#24699e] mr-1">${i.qty}</span>
-                        <button type="button" onclick="openDispatchEditModal('${i.id}')" class="p-1 text-slate-400 hover:text-[#24699e] rounded-lg" title="Edit Entri">
-                            <i data-lucide="pencil" class="w-3.5 h-3.5"></i>
-                        </button>
-                        <button type="button" onclick="deleteDispatchEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg" title="Hapus Entri">
+                    <div class="flex items-center gap-2">
+                        <span class="text-base font-extrabold text-[#24699e]">${i.qty}</span>
+                        <button type="button" onclick="deleteDispatchEntry('${i.id}')" class="p-1 text-slate-400 hover:text-rose-600 rounded-lg">
                             <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                         </button>
                     </div>
@@ -4002,76 +5873,6 @@ function doPost(e) {
             `).join('');
             lucide.createIcons();
         }
-
-        function openDispatchEditModal(id) {
-            const item = dispatchEntries.find(x => x.id === id);
-            if (!item) return;
-
-            const packers = usersData.filter(u => u.role === 'Packer' || u.role === 'Operator');
-            const listPackers = packers.length > 0 ? packers : usersData;
-            const packerSel = document.getElementById('edit-dispatch-packer');
-            packerSel.innerHTML = [...listPackers].sort((a, b) => a.username.localeCompare(b.username, 'id'))
-                .map(u => `<option value="${u.username}">${u.username}</option>`).join('');
-
-            const expSel = document.getElementById('edit-dispatch-expedisi');
-            expSel.innerHTML = [...expedisiData].sort((a, b) => a.name.localeCompare(b.name, 'id'))
-                .map(e => `<option value="${e.name}">${e.name}</option>`).join('');
-
-            document.getElementById('edit-dispatch-id').value = item.id;
-            document.getElementById('edit-dispatch-date').value = item.date;
-            packerSel.value = item.packer;
-            expSel.value = item.expedisi;
-            document.getElementById('edit-dispatch-qty').value = item.qty;
-
-            const modal = document.getElementById('dispatch-edit-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            lucide.createIcons();
-        }
-
-        function closeDispatchEditModal() {
-            const modal = document.getElementById('dispatch-edit-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
-        }
-
-        document.getElementById('dispatch-edit-form')?.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const id = document.getElementById('edit-dispatch-id').value;
-            const date = document.getElementById('edit-dispatch-date').value || getTodayISO();
-            const packer = document.getElementById('edit-dispatch-packer').value;
-            const expedisi = document.getElementById('edit-dispatch-expedisi').value;
-            const qty = parseInt(document.getElementById('edit-dispatch-qty').value, 10);
-
-            if (!packer || !expedisi || !qty || qty < 1) {
-                showToast('Lengkapi Packer, Expedisi, dan Jumlah Resi.', 'warning');
-                return;
-            }
-
-            const idx = dispatchEntries.findIndex(x => x.id === id);
-            if (idx === -1) return;
-
-            dispatchEntries[idx] = {
-                ...dispatchEntries[idx],
-                date,
-                packer,
-                expedisi,
-                qty
-            };
-
-            saveAppStateToLocal();
-            postToGoogleSheet(
-                'Dispatch',
-                ['ID', 'Tanggal', 'Jam', 'Packer', 'Expedisi', 'Jumlah Resi', 'Input Oleh'],
-                dispatchEntries.map(i => [i.id, i.date, i.timestamp, i.packer, i.expedisi, i.qty, i.createdBy]),
-                'replace_all'
-            );
-
-            closeDispatchEditModal();
-            renderDispatchStatsAndList();
-            renderDispatchReport();
-            showToast(`Entri resi ${packer} (${expedisi}: ${qty}) berhasil diperbarui!`, 'success');
-        });
 
         document.getElementById('dispatch-entry-form')?.addEventListener('submit', function(e) {
             e.preventDefault();
